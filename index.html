@@ -628,9 +628,20 @@
 
         function closeModal() { document.getElementById('productModal').classList.remove('show'); currentProduct = null; }
 
-        function addToCart(id, event) {
+                function addToCart(id, event) {
             if(event) createRipple(event);
             let p = products.find(x => x.id === id);
+            
+            // Если товар уже в корзине - УДАЛЯЕМ его
+            let inCart = cart.some(c => c.id === id);
+            if (inCart) {
+                cart = cart.filter(c => c.id !== id);
+                localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
+                updateCartBadge();
+                updateCardButton(id, false);
+                return;
+            }
+
             if (p.sizes && p.sizes.length > 0) { openModal(p); return; }
             pushToCart(p, "Без размера");
         }
