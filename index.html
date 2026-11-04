@@ -4,69 +4,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RADZHIV.SHOP | Премиум витрина</title>
+    <title>RADZHIV.SHOP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* --- ПЕРЕМЕННЫЕ (ТЕМНАЯ ТЕМА + СИНИЙ АКЦЕНТ) --- */
         :root { 
-            --bg: var(--tg-theme-bg-color, #0f0f11); 
-            --text: var(--tg-theme-text-color, #ffffff); 
-            --hint: var(--tg-theme-hint-color, #8b8b93); 
-            --btn: #005FF9; 
-            --btn-text: #ffffff; 
-            --card-bg: #1c1c1f; 
-            --price-color: #F91155;
+            --bg: #0c0c0e; 
+            --surface: #161619;
+            --card-bg: #1c1c21; 
+            --text: #ffffff; 
+            --text-muted: #8b8b93; 
+            --accent: #005FF9; 
+            --price: #F91155;
         }
-        
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: radial-gradient(circle at 50% 0%, #1e1e24 0%, var(--bg) 70%); color: var(--text); margin: 0; padding: 0; min-height: 100vh; }
         
-        body { 
-            background: radial-gradient(circle at top, #1e1e24 0%, var(--bg) 100%);
-            color: var(--text); margin: 0; padding: 0; min-height: 100vh;
-        }
-        
-        .container { max-width: 1300px; margin: 0 auto; padding: 20px; }
-        
-        /* --- ШАПКА (GLASSMORPHISM) --- */
+        /* HEADER */
         .top-header { 
-            display: flex; align-items: center; gap: 20px; padding: 15px 20px; 
-            background: rgba(28, 28, 31, 0.7); backdrop-filter: blur(12px);
+            display: flex; align-items: center; gap: 20px; padding: 15px 30px; 
+            background: rgba(22, 22, 25, 0.8); backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
             position: sticky; top: 0; z-index: 100; 
         }
-        .logo { font-weight: 900; font-size: 26px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); text-decoration: none; white-space: nowrap; }
-        .search-wrapper { flex-grow: 1; position: relative; }
-        .search-box { width: 100%; padding: 12px 20px; border-radius: 12px; border: none; background: #2a2a30; color: var(--text); font-size: 15px; outline: none; transition: 0.3s; }
-        .search-box:focus { background: #33333a; box-shadow: 0 0 0 2px var(--btn); }
-        .header-icons { display: flex; gap: 20px; font-size: 24px; cursor: pointer; align-items: center; }
-        .header-icons span { transition: transform 0.2s; }
-        .header-icons span:hover { transform: scale(1.1); }
+        .logo { font-weight: 900; font-size: 24px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); text-decoration: none; }
+        .search-wrapper { flex-grow: 1; position: relative; max-width: 600px; }
+        .search-box { width: 100%; padding: 12px 20px; border-radius: 12px; border: none; background: rgba(255,255,255,0.05); color: var(--text); font-size: 15px; outline: none; transition: 0.3s; }
+        .search-box:focus { background: rgba(255,255,255,0.1); box-shadow: 0 0 0 2px var(--accent); }
+        .header-actions { display: flex; gap: 20px; font-size: 24px; align-items: center; margin-left: auto; }
+        .header-actions span { cursor: pointer; transition: transform 0.2s, color 0.2s; }
+        .header-actions span:hover { transform: scale(1.1); }
         .cart-icon { position: relative; }
-        .cart-badge { position: absolute; top: -8px; right: -12px; background: var(--price-color); color: white; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 12px; display: none; }
+        .cart-badge { position: absolute; top: -6px; right: -10px; background: var(--price); color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 10px; display: none; }
 
-        /* --- HERO BANNER (БАННЕР) --- */
-        .hero { 
-            margin: 20px 0 30px 0; border-radius: 20px; overflow: hidden; position: relative;
-            background: linear-gradient(135deg, #005FF9 0%, #003b9e 100%);
-            display: flex; align-items: center; justify-content: space-between; padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 95, 249, 0.3);
-        }
-        .hero-text h1 { margin: 0 0 10px 0; font-size: 32px; font-weight: 900; }
-        .hero-text p { margin: 0; font-size: 16px; opacity: 0.9; }
+        /* PAGE TITLE */
+        .page-title-wrap { max-width: 1300px; margin: 30px auto 10px auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; }
+        .page-title { font-size: 28px; font-weight: 900; margin: 0; }
+        .page-title span { color: var(--price); }
 
-        /* --- КАТЕГОРИИ --- */
-        .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; }
+        /* CATEGORIES */
+        .categories-wrap { position: sticky; top: 73px; z-index: 99; background: rgba(12, 12, 14, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; margin-bottom: 20px; }
+        .categories { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; max-width: 1300px; margin: 0 auto; padding: 0 20px; }
         .categories::-webkit-scrollbar { display: none; }
-        .cat-btn { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); color: var(--text); padding: 10px 22px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
-        .cat-btn:hover { background: #2a2a30; }
-        .cat-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); box-shadow: 0 4px 15px rgba(0,95,249,0.4); }
-        
-        /* --- СЕТКА ТОВАРОВ --- */
+        .cat-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: var(--text); padding: 8px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-btn:hover { background: rgba(255,255,255,0.1); }
+        .cat-btn.active { background: var(--accent); color: white; }
+
+        /* GRID */
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 20px 40px 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
         
-        /* --- КАРТОЧКА ТОВАРА --- */
+        /* CARD */
         .card { 
-            background: var(--card-bg); border-radius: 16px; padding: 0; display: flex; flex-direction: column; 
+            background: var(--card-bg); border-radius: 16px; display: flex; flex-direction: column; 
             cursor: pointer; position: relative; transition: transform 0.2s, box-shadow 0.2s; 
             overflow: hidden; border: 1px solid rgba(255,255,255,0.03);
         }
@@ -75,83 +64,88 @@
         .card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
         .card:hover .card-img-wrapper img { transform: scale(1.08); }
         
-        .badge { position: absolute; top: 10px; left: 10px; background: var(--price-color); color: white; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px; text-transform: uppercase; z-index: 10; }
+        .badge { position: absolute; top: 10px; left: 10px; background: var(--price); color: white; font-size: 11px; font-weight: 900; padding: 4px 8px; border-radius: 8px; text-transform: uppercase; z-index: 10; }
         .badge.sold { background: #555; }
         
         .heart { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); width: 34px; height: 34px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 16px; z-index: 10; transition: 0.2s; }
         .heart:hover { background: rgba(0,0,0,0.9); transform: scale(1.1); }
-        .heart.active { color: var(--price-color); }
+        .heart.active { color: var(--price); }
         
         .card-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
         .title { font-size: 14px; font-weight: 600; margin: 0 0 8px 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 40px; }
         .price-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; margin-top: auto; flex-wrap: wrap; }
-        .price { font-size: 20px; font-weight: 900; color: var(--price-color); }
-        .old-price { font-size: 13px; text-decoration: line-through; color: var(--hint); }
+        .price { font-size: 20px; font-weight: 900; color: var(--price); }
+        .old-price { font-size: 13px; text-decoration: line-through; color: var(--text-muted); }
         
-        .buy-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; width: 100%; cursor: pointer; transition: 0.2s; }
+        .buy-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; width: 100%; cursor: pointer; transition: 0.2s; }
         .buy-btn:hover { background: #0046bd; }
         .buy-btn.disabled { background: #333; color: #777; pointer-events: none; }
 
-        /* --- МОДАЛЬНОЕ ОКНО ТОВАРА --- */
+        /* MODAL ITEM */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #1c1c1f; width: 100%; max-width: 1000px; border-radius: 24px; padding: 0; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); }
+        .modal-content { background: var(--surface); width: 100%; max-width: 1000px; border-radius: 24px; padding: 0; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); }
         .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 20; display: flex; justify-content: center; align-items: center; }
         
         .modal-body { display: flex; flex-direction: column; }
         @media (min-width: 768px) { .modal-body { flex-direction: row; } }
         
+        /* SLIDER FIXED */
         .slider-container { flex: 1.2; background: #000; position: relative; border-radius: 24px 0 0 24px; overflow: hidden; display: flex; align-items: center; }
-        .slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; width: 100%; height: 100%; }
+        .slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; width: 100%; height: 100%; scroll-behavior: smooth; }
         .slider::-webkit-scrollbar { display: none; }
         .slider img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; max-height: 60vh; }
         
-        .modal-details { flex: 1; padding: 30px; display: flex; flex-direction: column; background: #1c1c1f; border-radius: 0 24px 24px 0; }
+        /* СТРЕЛКИ СЛАЙДЕРА */
+        .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .slider-arrow:hover { background: var(--accent); }
+        .slider-arrow.left { left: 10px; }
+        .slider-arrow.right { right: 10px; }
+
+        .modal-details { flex: 1; padding: 30px; display: flex; flex-direction: column; background: var(--surface); border-radius: 0 24px 24px 0; }
         .modal-title { font-size: 24px; font-weight: 900; margin: 0 0 10px 0; line-height: 1.3; }
         .modal-price-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-        .modal-price { font-size: 30px; font-weight: 900; color: var(--price-color); }
-        .modal-desc { font-size: 15px; line-height: 1.6; color: var(--hint); margin-bottom: 20px; white-space: pre-wrap; flex-grow: 1; }
+        .modal-price { font-size: 30px; font-weight: 900; color: var(--price); }
+        .modal-desc { font-size: 15px; line-height: 1.6; color: var(--text-muted); margin-bottom: 20px; white-space: pre-wrap; flex-grow: 1; }
         
         .sizes-wrap { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .size-btn { padding: 10px 18px; border: 2px solid #444; background: transparent; color: var(--text); border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .size-btn.active { border-color: var(--btn); background: var(--btn); color: white; }
+        .size-btn { padding: 10px 18px; border: 2px solid #333; background: transparent; color: var(--text); border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .size-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
         
         .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
-        .modal-buy-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 16px; border-radius: 14px; font-weight: 900; width: 100%; cursor: pointer; font-size: 16px; transition: 0.2s; flex: 1; }
+        .modal-buy-btn { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 900; width: 100%; cursor: pointer; font-size: 16px; transition: 0.2s; flex: 1; }
         .modal-buy-btn:hover { background: #0046bd; }
-        .ask-btn { background: #2a2a30; color: white; border: none; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
-        .ask-btn:hover { background: #33333a; }
+        .ask-btn { background: rgba(255,255,255,0.05); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; }
+        .ask-btn:hover { background: rgba(255,255,255,0.1); }
 
         .similar-title { margin-top: 30px; font-size: 18px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         .similar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
-        .similar-item { cursor: pointer; background: #2a2a30; padding: 5px; border-radius: 10px; text-align: center; transition: 0.2s; }
-        .similar-item:hover { background: #33333a; }
+        .similar-item { cursor: pointer; background: rgba(255,255,255,0.03); padding: 5px; border-radius: 10px; text-align: center; transition: 0.2s; }
+        .similar-item:hover { background: rgba(255,255,255,0.08); }
         .similar-item img { width: 100%; border-radius: 8px; aspect-ratio: 1/1; object-fit: cover; margin-bottom: 5px; }
         .similar-item div { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .similar-item b { color: var(--price-color); }
+        .similar-item b { color: var(--price); }
 
-        /* --- КОРЗИНА --- */
+        /* CART & SUCCESS */
         .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1100; align-items: center; justify-content: center; padding: 20px; }
-        .cart-content { background: #1c1c1f; width: 100%; max-width: 600px; border-radius: 24px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.1); }
-        .cart-item { display: flex; gap: 15px; margin-bottom: 15px; background: #2a2a30; padding: 10px; border-radius: 12px; align-items: center; }
+        .cart-content { background: var(--surface); width: 100%; max-width: 600px; border-radius: 24px; padding: 30px; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+        .cart-item { display: flex; gap: 15px; margin-bottom: 15px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; align-items: center; }
         .cart-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
         .cart-item-info { flex-grow: 1; }
         .cart-item-info h4 { margin: 0 0 5px 0; font-size: 14px; }
-        .cart-item-info span { font-size: 14px; color: var(--price-color); font-weight: bold; }
+        .cart-item-info span { font-size: 14px; color: var(--price); font-weight: bold; }
         .cart-total { font-size: 22px; font-weight: 900; text-align: right; margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
-        .promo-input { width: 100%; padding: 14px; border-radius: 12px; border: none; background: #2a2a30; color: white; margin-bottom: 15px; font-size: 15px; outline: none; }
+        .promo-input { width: 100%; padding: 14px; border-radius: 12px; border: none; background: rgba(255,255,255,0.05); color: white; margin-bottom: 15px; font-size: 15px; outline: none; }
 
-        /* --- ПУСТЫЕ СОСТОЯНИЯ (ИЗБРАННОЕ) --- */
-        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; }
+        /* EMPTY STATE */
+        .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; grid-column: 1 / -1; }
         .empty-state .icon { font-size: 60px; margin-bottom: 20px; opacity: 0.5; }
         .empty-state h3 { font-size: 20px; margin: 0 0 10px 0; }
-        .empty-state p { color: var(--hint); margin: 0; }
+        .empty-state p { color: var(--text-muted); margin: 0; }
 
-        /* --- АДАПТИВ --- */
+        /* ADAPTIVE */
         @media (max-width: 600px) {
-            .top-header { flex-direction: column; border-radius: 0; padding: 15px; gap: 15px; }
+            .top-header { flex-direction: column; padding: 15px; gap: 15px; }
             .search-wrapper { width: 100%; }
-            .hero { padding: 20px; flex-direction: column; text-align: center; }
-            .hero-text h1 { font-size: 24px; }
             .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
             .card-info { padding: 10px; }
             .title { font-size: 13px; height: 36px; }
@@ -163,28 +157,29 @@
             .modal-details { padding: 20px; border-radius: 0; }
             .modal-title { font-size: 20px; }
             .similar-grid { grid-template-columns: repeat(2, 1fr); }
+            .slider-arrow { display: none; } /* На телефоне листаем свайпом */
         }
     </style>
 </head>
 <body>
     <div class="top-header">
-        <a href="#" class="logo" onclick="resetView()">RADZHIV.SHOP</a>
+        <a href="#" class="logo" onclick="resetView(); return false;">RADZHIV.SHOP</a>
         <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Искать товары, бренды..."></div>
-        <div class="header-icons">
+        <div class="header-actions">
             <span id="fav-icon" onclick="toggleFavView()" title="Избранное">❤️</span>
             <span class="cart-icon" onclick="openCart()" title="Корзина">🛒<span class="cart-badge" id="cart-badge">0</span></span>
         </div>
     </div>
     
-    <div class="container">
-        <div class="hero" id="hero-banner">
-            <div class="hero-text">
-                <h1>Новая коллекция уже здесь</h1>
-                <p>Стильная одежда и аксессуары по лучшим ценам</p>
-            </div>
-        </div>
+    <div class="page-title-wrap">
+        <h1 class="page-title" id="page-title">Каталог товаров</h1>
+    </div>
 
+    <div class="categories-wrap">
         <div class="categories" id="categories-container"></div>
+    </div>
+
+    <div class="container">
         <div class="grid" id="product-grid"></div>
     </div>
 
@@ -194,7 +189,9 @@
             <button class="modal-close" onclick="closeModal()">✕</button>
             <div class="modal-body">
                 <div class="slider-container">
+                    <button class="slider-arrow left" onclick="moveSlider(-1)">❮</button>
                     <div class="slider" id="modal-slider"></div>
+                    <button class="slider-arrow right" onclick="moveSlider(1)">❯</button>
                 </div>
                 <div class="modal-details">
                     <h2 id="modal-title" class="modal-title"></h2>
@@ -229,20 +226,20 @@
         </div>
     </div>
 
-    <!-- ОКНО УСПЕХА (ДЛЯ БРАУЗЕРА) -->
+    <!-- ОКНО УСПЕХА -->
     <div class="cart-modal" id="successModal" onclick="if(event.target===this) closeSuccess()">
         <div class="cart-content" style="text-align: center; max-width: 400px;">
             <div style="font-size: 60px; margin-bottom: 20px;">✅</div>
             <h2 style="margin: 0 0 10px 0;">Заказ сформирован!</h2>
-            <p style="color: #8b8b93; margin-bottom: 20px;">Чтобы получить товар, перейдите в нашего Телеграм-бота и нажмите "Оформить заказ" там.</p>
-            <a href="https://t.me/radzhiv_shop_bot" style="display: block; background: var(--btn); color: white; text-decoration: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px;">Перейти в бота</a>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Чтобы получить товар, перейдите в нашего Телеграм-бота и нажмите "Оформить заказ" там.</p>
+            <a href="https://t.me/radzhiv_shop_bot" style="display: block; background: var(--accent); color: white; text-decoration: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px;">Перейти в бота</a>
             <button class="ask-btn" style="width: 100%; margin-top: 10px;" onclick="closeSuccess()">Закрыть</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
-        if (tg) { tg.expand(); tg.setHeaderColor('#0f0f11'); }
+        if (tg) { tg.expand(); tg.setHeaderColor('#0c0c0e'); }
         const products = [{"id": 1, "name": "👔 КЛАССИЧЕСКИЙ ИТАЛЬЯНСКИЙ ПИДЖАК ENRICO MARINELLI 👔", "price": "500", "old_price": "", "category": "Верхняя одежда", "status": "instock", "desc": "Товар Б/У\nБренд: Enrico Marinelli (Италия)\nЦвет: Классический серый\nМатериал: Натуральная шерсть с добавлением шёлка (Wool & Silk) \nСостояние: Хорошее\n📏 Точные замеры:\nПлечи — 50 см\nПолуобхват груди — 56 см\nРукав от плеча — 61 см\nДлина по спине от воротника — 78 см\n⚠️ Нюанс: есть несколько небольших следов от ручки (лёгкие чирки). Они практически незаметны, видно только при детальном осмотре.", "sizes": [], "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg", "img/1_img_4.jpg", "img/1_img_5.jpg"]}, {"id": 2, "name": "🧥 МУЖСКАЯ ЧЁРНАЯ ХУДИ 🧥", "price": "450", "old_price": "", "category": "Кофты", "status": "instock", "desc": "Товар Б/У\nРазмер: S\nЦвет: Чёрный\nСостояние: Хорошее\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "sizes": [], "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg", "img/2_img_2.jpg", "img/2_img_3.jpg", "img/2_img_4.jpg"]}, {"id": 3, "name": "🩳 ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ 🩳", "price": "700", "old_price": "", "category": "Шорты", "status": "instock", "desc": "Новые, только примерялись. \n\nРазмер: S\nЦвет: Чёрный\nСостояние: Новое (без упаковки и бирок)\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "sizes": [], "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg", "img/3_img_3.jpg", "img/3_img_4.jpg"]}, {"id": 4, "name": "👕ПЛОТНАЯ МУСКАЯ ФУТБОЛКА 👕", "price": "500", "old_price": "", "category": "Футболки", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.\nРазмер: S\nЦвет: Чёрный", "sizes": [], "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg"]}, {"id": 5, "name": "🧥УДЛИНЕННАЯ ВЕТРОВКА O'STIN! 🧥", "price": "700", "old_price": "", "category": "Куртки", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nРазмер: 44 (S/M)\nЦвет: Синий\nСезон: Демисезон\nМатериал: Полиэстер\nСостояние: Хорошее\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "sizes": [], "imgs": ["img/5_img_0.jpg", "img/5_img_1.jpg", "img/5_img_2.jpg"]}];
         
         let currentProduct = null;
@@ -252,12 +249,15 @@
         
         let cart = JSON.parse(localStorage.getItem('radzhiv_cart')) || [];
         let favorites = JSON.parse(localStorage.getItem('radzhiv_favs')) || [];
+        
+        let currentSlideIndex = 0;
 
         const grid = document.getElementById('product-grid');
         const searchInput = document.getElementById('search');
         const modal = document.getElementById('productModal');
         const catContainer = document.getElementById('categories-container');
-        const heroBanner = document.getElementById('hero-banner');
+        const pageTitle = document.getElementById('page-title');
+        const favIcon = document.getElementById('fav-icon');
 
         function updateCartBadge() {
             document.getElementById('cart-badge').innerText = cart.length;
@@ -268,7 +268,8 @@
             currentCategory = 'Все';
             showFavoritesOnly = false;
             searchInput.value = '';
-            heroBanner.style.display = 'flex';
+            pageTitle.innerHTML = 'Каталог товаров';
+            favIcon.style.color = 'white';
             initCategories();
             filterProducts();
         }
@@ -283,7 +284,8 @@
                 btn.onclick = () => { 
                     currentCategory = c; 
                     showFavoritesOnly = false; 
-                    heroBanner.style.display = 'flex';
+                    pageTitle.innerHTML = `Категория: ${c}`;
+                    favIcon.style.color = 'white';
                     initCategories(); 
                     filterProducts(); 
                 };
@@ -292,8 +294,6 @@
         }
 
         function filterProducts() {
-            showFavoritesOnly = false;
-            heroBanner.style.display = 'flex';
             const term = searchInput.value.toLowerCase();
             let filtered = products;
             if (currentCategory !== 'Все') filtered = filtered.filter(p => p.category === currentCategory);
@@ -305,16 +305,18 @@
             showFavoritesOnly = !showFavoritesOnly;
             if (showFavoritesOnly) {
                 currentCategory = 'Все';
-                heroBanner.style.display = 'none';
+                pageTitle.innerHTML = '❤️ Избранное';
+                favIcon.style.color = 'var(--price)';
                 initCategories();
+                
                 const favProducts = products.filter(p => favorites.includes(p.id));
                 if (favProducts.length === 0) {
-                    grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><div class="icon">🤍</div><h3>В избранном пока пусто</h3><p>Нажмите на сердечко на карточке товара, чтобы сохранить его здесь.</p></div>`;
+                    grid.innerHTML = `<div class="empty-state"><div class="icon">🤍</div><h3>В избранном пока пусто</h3><p>Нажмите на сердечко на карточке товара, чтобы сохранить его здесь.</p></div>`;
                 } else {
                     renderProducts(favProducts);
                 }
             } else {
-                filterProducts();
+                resetView();
             }
         }
 
@@ -332,7 +334,7 @@
         function renderProducts(items) {
             grid.innerHTML = '';
             if (items.length === 0 && !showFavoritesOnly) { 
-                grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><div class="icon">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или категорию.</p></div>'; 
+                grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или категорию.</p></div>'; 
                 return; 
             }
             
@@ -375,9 +377,20 @@
 
         searchInput.addEventListener('input', filterProducts);
 
+        // --- СЛАЙДЕР ---
+        function moveSlider(direction) {
+            const slider = document.getElementById('modal-slider');
+            const images = slider.querySelectorAll('img');
+            if(images.length <= 1) return;
+            
+            currentSlideIndex = (currentSlideIndex + direction + images.length) % images.length;
+            images[currentSlideIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
         function openModal(p) {
             currentProduct = p;
             selectedSize = "";
+            currentSlideIndex = 0;
             
             const slider = document.getElementById('modal-slider');
             slider.innerHTML = '';
@@ -464,14 +477,14 @@
                     <img src="${item.img}">
                     <div class="cart-item-info">
                         <h4>${item.name}</h4>
-                        <div style="font-size:12px; color:#8b8b93;">Размер: ${item.size}</div>
+                        <div style="font-size:12px; color:var(--text-muted);">Размер: ${item.size}</div>
                         <span>${item.price}</span>
                     </div>
-                    <button style="background:#F91155; border:none; color:white; padding:8px; border-radius:8px; cursor:pointer;" onclick="removeFromCart(${idx})">✖</button>
+                    <button style="background:var(--price); border:none; color:white; padding:8px; border-radius:8px; cursor:pointer;" onclick="removeFromCart(${idx})">✖</button>
                 `;
                 wrap.appendChild(div);
             });
-            if(cart.length === 0) wrap.innerHTML = '<p style="text-align:center; color:#8b8b93; padding: 20px 0;">Корзина пуста</p>';
+            if(cart.length === 0) wrap.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding: 20px 0;">Корзина пуста</p>';
             document.getElementById('cart-total').innerText = `Итого: ${total} ₽`;
             document.getElementById('cartModal').style.display = 'flex';
         }
@@ -502,7 +515,6 @@
                     updateCartBadge();
                 }, 300); 
             } else { 
-                // Для браузера
                 cart = []; 
                 localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
                 updateCartBadge();
