@@ -388,13 +388,14 @@
     <script>
         const tg = window.Telegram?.WebApp;
         
-        // ПРОВЕРКА: Открыто ли через Telegram
-        if (!tg || !tg.initData) {
-            document.getElementById('tg-blocker').style.display = 'flex';
-        } else {
+        if (tg) {
+            document.getElementById('tg-blocker').style.display = 'none';
             document.getElementById('main-content').style.display = 'flex';
             tg.expand(); 
             tg.setHeaderColor('#09090b');
+        } else {
+            document.getElementById('tg-blocker').style.display = 'flex';
+            document.getElementById('main-content').style.display = 'none';
         }
 
         function createRipple(event) {
@@ -573,7 +574,8 @@
             if (card) {
                 const btn = card.querySelector('.buy-btn');
                 if (btn && !btn.classList.contains('disabled')) {
-                    if (inCart) { btn.classList.add('added'); btn.innerText = 'В корзине'; } else { btn.classList.remove('added'); btn.innerText = 'В корзину'; }
+                    if (inCart) { btn.classList.add('added'); btn.innerText = 'В корзине'; } 
+                    else { btn.classList.remove('added'); btn.innerText = 'В корзину'; }
                 }
             }
         }
@@ -619,23 +621,20 @@
                 });
             }
 
-                       const buyBtn = document.getElementById('modal-buy');
+            const buyBtn = document.getElementById('modal-buy');
             if (p.status === 'sold') { 
                 buyBtn.innerText = 'Нет в наличии'; 
                 buyBtn.className = 'buy-btn disabled'; 
                 buyBtn.disabled = true; 
             } else { 
                 let inCart = cart.some(c => c.id === p.id); 
-                if (inCart) {
-                    buyBtn.innerText = 'В корзине (Удалить)'; 
-                    buyBtn.className = 'buy-btn added'; 
-                } else {
-                    buyBtn.innerText = 'В корзину'; 
-                    buyBtn.className = 'buy-btn'; 
-                }
+                buyBtn.innerText = inCart ? 'В корзине (Удалить)' : 'В корзину'; 
+                buyBtn.className = inCart ? 'buy-btn added' : 'buy-btn'; 
                 buyBtn.disabled = false; 
             }
-                        buyBtn.onclick = () => {
+
+            buyBtn.onclick = (e) => {
+                if (e) createRipple(e);
                 let inCart = cart.some(c => c.id === p.id);
                 if (inCart) {
                     cart = cart.filter(c => c.id !== p.id);
@@ -645,17 +644,22 @@
                     buyBtn.innerText = 'В корзину';
                     buyBtn.className = 'buy-btn';
                 } else {
-                    addToCartFromModal(event);
+                    if (p.sizes && p.sizes.length > 0 && !selectedSize) { alert("Выберите размер!"); return; }
+                    pushToCart(p, selectedSize || "Без размера");
+                    buyBtn.innerText = 'В корзине (Удалить)';
+                    buyBtn.className = 'buy-btn added';
                 }
             };
+            
+            document.getElementById('productModal').classList.add('show');
+        }
 
         function closeModal() { document.getElementById('productModal').classList.remove('show'); currentProduct = null; }
 
-                function addToCart(id, event) {
+        function addToCart(id, event) {
             if(event) createRipple(event);
             let p = products.find(x => x.id === id);
             
-            // Если товар уже в корзине - УДАЛЯЕМ его
             let inCart = cart.some(c => c.id === id);
             if (inCart) {
                 cart = cart.filter(c => c.id !== id);
@@ -667,14 +671,6 @@
 
             if (p.sizes && p.sizes.length > 0) { openModal(p); return; }
             pushToCart(p, "Без размера");
-        }
-
-        function addToCartFromModal(event) {
-            if(event) createRipple(event);
-            if (currentProduct) {
-                if (currentProduct.sizes && currentProduct.sizes.length > 0 && !selectedSize) { alert("Выберите размер!"); return; }
-                pushToCart(currentProduct, selectedSize || "Без размера"); closeModal();
-            }
         }
 
         function pushToCart(p, size) {
@@ -757,8 +753,7 @@
 
         function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
 
-        // Инициализация только если мы в Телеграме
-        if (tg && tg.initData) {
+        if (tg) {
             setTimeout(() => { resetView(); updateCartBadge(); }, 300);
         }
     </script>
