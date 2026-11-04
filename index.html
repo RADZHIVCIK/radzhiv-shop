@@ -27,6 +27,15 @@
         }
         #tg-blocker a:hover { background: var(--accent-hover); transform: scale(1.05); }
 
+        /* КРАСИВЫЙ TOAST (Вместо alert) */
+        #toast { 
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%); 
+            background: #ef4444; color: white; padding: 12px 24px; border-radius: 12px; 
+            font-weight: bold; font-size: 14px; z-index: 99999; transition: top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; width: max-content; max-width: 90%;
+        }
+        #toast.show { top: 20px; }
+
         /* Background & Particles */
         body { background: radial-gradient(circle at 50% 0%, #1f1f27 0%, var(--bg) 80%); color: var(--text); margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative; }
         
@@ -133,6 +142,17 @@
         .buy-btn.disabled { background: #3f3f46; color: #a1a1aa; pointer-events: none; box-shadow: none; }
         .buy-btn.added { background: linear-gradient(145deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); }
 
+        /* Размеры - КРАСИВЫЕ */
+        .size-btn { 
+            padding: 10px 20px; border: 2px solid #3f3f46; background: rgba(255,255,255,0.05); color: white; 
+            border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s; font-size: 14px;
+        }
+        .size-btn:hover { border-color: #6b7280; background: rgba(255,255,255,0.1); }
+        .size-btn.active { 
+            background: var(--accent); border-color: var(--accent); color: white; 
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transform: scale(1.05);
+        }
+
         /* Modals - Deep Liquid Glass */
         .modal { display: flex; visibility: hidden; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s, visibility 0.3s; }
         .modal.show { visibility: visible; opacity: 1; }
@@ -161,7 +181,7 @@
         .thumbnail { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; cursor: pointer; opacity: 0.4; transition: 0.2s; border: 2px solid transparent; }
         .thumbnail:hover, .thumbnail.active { opacity: 1; border-color: var(--accent); }
 
-        /* Cart Modal */
+        /* Cart & Confirm Modal */
         .cart-modal { display: flex; visibility: hidden; opacity: 0; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1100; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s, visibility 0.3s; }
         .cart-modal.show { visibility: visible; opacity: 1; }
         .cart-content { 
@@ -250,6 +270,9 @@
     </style>
 </head>
 <body>
+    <!-- КРАСИВЫЙ TOAST -->
+    <div id="toast">Текст уведомления</div>
+
     <!-- Блокировка для обычных браузеров -->
     <div id="tg-blocker">
         <div class="icon">🔒</div>
@@ -283,6 +306,7 @@
 
         <div class="container"><div class="grid" id="product-grid"></div></div>
 
+        <!-- МОДАЛКА ФИЛЬТРОВ -->
         <div class="modal" id="filterModal" onclick="if(event.target===this) closeFilters()">
             <div class="modal-content" style="max-width: 400px; padding: 25px;">
                 <button class="modal-close" onclick="closeFilters()">✕</button>
@@ -316,6 +340,7 @@
             </div>
         </div>
 
+        <!-- МОДАЛКА КАК ЗАКАЗАТЬ -->
         <div class="modal" id="howItWorksModal" onclick="if(event.target===this) closeHowItWorks()">
             <div class="modal-content" style="max-width: 450px; padding: 25px;">
                 <button class="modal-close" onclick="closeHowItWorks()">✕</button>
@@ -330,6 +355,7 @@
             </div>
         </div>
 
+        <!-- МОДАЛКА ТОВАРА -->
         <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
             <div class="modal-content">
                 <button class="modal-close" onclick="closeModal()">✕</button>
@@ -354,6 +380,7 @@
             </div>
         </div>
 
+        <!-- КОРЗИНА -->
         <div class="cart-modal" id="cartModal" onclick="if(event.target===this) closeCart()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeCart()">✕</button>
@@ -361,10 +388,24 @@
                 <div id="cart-items-wrap"></div>
                 <div class="cart-total" id="cart-total">Итого: 0 ₽</div>
                 <input type="text" id="promo-input" class="promo-input" placeholder="Промокод">
-                <button class="buy-btn" id="checkout-btn" onclick="checkout(event)" style="padding: 15px;">Оформить заказ</button>
+                <button class="buy-btn" id="checkout-btn" onclick="openConfirm()" style="padding: 15px;">Оформить заказ</button>
             </div>
         </div>
 
+        <!-- ПОДТВЕРЖДЕНИЕ ЗАКАЗА -->
+        <div class="cart-modal" id="confirmModal" onclick="if(event.target===this) closeConfirm()">
+            <div class="cart-content">
+                <button class="modal-close" onclick="closeConfirm()">✕</button>
+                <h2 style="margin-top:0; color:#fff;">Проверьте заказ</h2>
+                <div id="confirm-items-wrap" style="margin-bottom:15px;"></div>
+                <div class="cart-total" id="confirm-total" style="margin-bottom:20px;">Итого: 0 ₽</div>
+                <p style="color:var(--muted); font-size:13px; margin-bottom:20px; line-height:1.4;">Нажимая «Подтвердить», вы отправляете заказ администратору. Мы свяжемся с вами для уточнения доставки.</p>
+                <button class="buy-btn" id="final-checkout-btn" onclick="finalCheckout(event)" style="padding: 15px; margin-bottom:10px;">Подтвердить и отправить</button>
+                <button class="reset-btn" onclick="closeConfirm()" style="background:#3f3f46; box-shadow:none;">Вернуться в корзину</button>
+            </div>
+        </div>
+
+        <!-- МОИ ЗАКАЗЫ -->
         <div class="cart-modal" id="ordersModal" onclick="if(event.target===this) closeOrders()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeOrders()">✕</button>
@@ -386,17 +427,24 @@
     </div>
 
     <script>
+        // --- КРАСИВЫЕ УВЕДОМЛЕНИЯ ВМЕСТО ALERT ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
         // УМНАЯ ПРОВЕРКА ТЕЛЕГРАМА (Ждем до 3 секунд)
         window.addEventListener('load', function() {
             let attempts = 0;
-            const maxAttempts = 20; // 20 * 150ms = 3 секунды
+            const maxAttempts = 20; 
             
             const tgCheck = setInterval(function() {
                 const tg = window.Telegram?.WebApp;
                 attempts++;
                 
                 if (tg) { 
-                    // Телеграм найден!
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'none';
                     document.getElementById('main-content').style.display = 'flex';
@@ -408,7 +456,6 @@
                     resetView();
                     updateCartBadge();
                 } else if (attempts >= maxAttempts) {
-                    // Прошло 3 секунды, Телеграма нет — значит это браузер
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'flex';
                     document.getElementById('main-content').style.display = 'none';
@@ -631,13 +678,22 @@
             document.getElementById('modal-desc').innerText = p.desc || 'Описание отсутствует.';
             
             const sizesWrap = document.getElementById('modal-sizes'); sizesWrap.innerHTML = '';
-            if (p.sizes && p.sizes.length > 0) {
+            // Если размеров нет или он один - скрываем блок
+            if (p.sizes && p.sizes.length > 1) {
                 p.sizes.forEach(s => {
                     const btn = document.createElement('button'); btn.className = 'size-btn'; btn.innerText = s;
-                    btn.style.cssText = 'padding:8px 12px; border:2px solid #3f3f46; background:transparent; color:white; border-radius:8px; cursor:pointer; font-weight: bold; font-size: 13px; transition: 0.2s;';
-                    btn.onclick = () => { document.querySelectorAll('.size-btn').forEach(b => {b.style.borderColor = '#3f3f46'; b.style.background = 'transparent';}); btn.style.borderColor = 'var(--accent)'; btn.style.background = 'var(--accent)'; selectedSize = s; };
+                    btn.onclick = () => { 
+                        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active')); 
+                        btn.classList.add('active'); 
+                        selectedSize = s; 
+                    };
                     sizesWrap.appendChild(btn);
                 });
+            } else if (p.sizes && p.sizes.length === 1) {
+                selectedSize = p.sizes[0]; // Автоматически выбираем единственный размер
+                sizesWrap.style.display = 'none';
+            } else {
+                sizesWrap.style.display = 'none';
             }
 
             const buyBtn = document.getElementById('modal-buy');
@@ -663,7 +719,7 @@
                     buyBtn.innerText = 'В корзину';
                     buyBtn.className = 'buy-btn';
                 } else {
-                    if (p.sizes && p.sizes.length > 0 && !selectedSize) { alert("Выберите размер!"); return; }
+                    if (p.sizes && p.sizes.length > 1 && !selectedSize) { showToast("Выберите размер!"); return; }
                     pushToCart(p, selectedSize || "Без размера");
                     buyBtn.innerText = 'В корзине (Удалить)';
                     buyBtn.className = 'buy-btn added';
@@ -688,8 +744,12 @@
                 return;
             }
 
-            if (p.sizes && p.sizes.length > 0) { openModal(p); return; }
-            pushToCart(p, "Без размера");
+            // Если размеров несколько - открываем модалку для выбора
+            if (p.sizes && p.sizes.length > 1) { openModal(p); return; }
+            
+            // Если один размер - сразу добавляем
+            let sizeToUse = (p.sizes && p.sizes.length === 1) ? p.sizes[0] : "Без размера";
+            pushToCart(p, sizeToUse);
         }
 
         function pushToCart(p, size) {
@@ -721,29 +781,34 @@
             }, 300);
         }
 
-        function openOrders() {
-            const list = document.getElementById('orders-list'); list.innerHTML = '';
-            if (orders.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--muted); font-size:14px;">У вас пока нет заказов.</p>'; }
-            else {
-                [...orders].reverse().forEach(o => {
-                    const div = document.createElement('div'); div.className = 'order-card';
-                    let itemsHtml = o.items.map(i => `• ${i.name} (Арт: ${i.article})`).join('<br>');
-                    div.innerHTML = `<h4>Заказ от ${o.date}</h4><div class="order-status">${o.status}</div><div class="items-list">${itemsHtml}</div><div class="total-price">Итого: ${o.total} ₽</div>`;
-                    list.appendChild(div);
-                });
-            }
-            document.getElementById('ordersModal').classList.add('show');
+        // --- ПОДТВЕРЖДЕНИЕ ЗАКАЗА ---
+        function openConfirm() {
+            if (cart.length === 0) return;
+            closeCart();
+            
+            const wrap = document.getElementById('confirm-items-wrap'); wrap.innerHTML = ''; let total = 0;
+            cart.forEach(item => {
+                total += parseInt(item.price.replace(/\D/g,'')) || 0;
+                const div = document.createElement('div'); div.className = 'cart-item';
+                div.innerHTML = `<img src="${item.img}"><div style="flex-grow:1;"><div style="font-size:10px;color:var(--muted);">Арт: ${item.article}</div><h4 style="margin:0 0 5px 0; font-size:13px;">${item.name}</h4><div style="font-size:11px;color:var(--muted);">Размер: ${item.size}</div><span style="color:var(--price);font-weight:bold; font-size: 14px;">${item.price}</span></div>`;
+                wrap.appendChild(div);
+            });
+            document.getElementById('confirm-total').innerText = `Итого: ${total} ₽`;
+            document.getElementById('confirmModal').classList.add('show');
         }
-        function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
-        function checkout(event) {
+        function closeConfirm() {
+            document.getElementById('confirmModal').classList.remove('show');
+            openCart(); // Возвращаемся в корзину
+        }
+
+        function finalCheckout(event) {
             if(event) createRipple(event);
             if (cart.length === 0) return;
-            const btn = document.getElementById('checkout-btn'); 
             
-            if (btn.disabled) return; 
-            btn.disabled = true; 
-            btn.innerText = "Отправка...";
+            const btn = document.getElementById('final-checkout-btn');
+            if (btn.disabled) return;
+            btn.disabled = true; btn.innerText = "Отправка...";
 
             let promo = document.getElementById('promo-input').value;
             let total = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/\D/g,'')) || 0), 0);
@@ -761,15 +826,30 @@
                         tg.close(); 
                         cart = []; 
                         localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
-                        updateCartBadge(); updateView(); closeCart();
-                        btn.disabled = false; btn.innerText = "Оформить заказ"; 
+                        updateCartBadge(); updateView(); closeConfirm();
+                        btn.disabled = false; btn.innerText = "Подтвердить и отправить";
                     }, 300); 
                 } catch (e) {
-                    alert("Ошибка отправки.");
-                    btn.disabled = false; btn.innerText = "Оформить заказ";
+                    showToast("Ошибка отправки.");
+                    btn.disabled = false; btn.innerText = "Подтвердить и отправить";
                 }
             }
         }
+
+        function openOrders() {
+            const list = document.getElementById('orders-list'); list.innerHTML = '';
+            if (orders.length === 0) { list.innerHTML = '<p style="text-align:center; color:var(--muted); font-size:14px;">У вас пока нет заказов.</p>'; }
+            else {
+                [...orders].reverse().forEach(o => {
+                    const div = document.createElement('div'); div.className = 'order-card';
+                    let itemsHtml = o.items.map(i => `• ${i.name} (Арт: ${i.article})`).join('<br>');
+                    div.innerHTML = `<h4>Заказ от ${o.date}</h4><div class="order-status">${o.status}</div><div class="items-list">${itemsHtml}</div><div class="total-price">Итого: ${o.total} ₽</div>`;
+                    list.appendChild(div);
+                });
+            }
+            document.getElementById('ordersModal').classList.add('show');
+        }
+        function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
         function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
     </script>
