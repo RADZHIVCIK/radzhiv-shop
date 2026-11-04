@@ -651,23 +651,50 @@
         }
         function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
-        function checkout(event) {
+               function checkout(event) {
             if(event) createRipple(event);
             if (cart.length === 0) return;
-            const btn = document.getElementById('checkout-btn'); btn.disabled = true; btn.innerText = "Отправка...";
+            const btn = document.getElementById('checkout-btn'); 
+            
+            // Защита от спама
+            if (btn.disabled) return; 
+            btn.disabled = true; 
+            btn.innerText = "Отправка...";
 
             let promo = document.getElementById('promo-input').value;
             let total = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/\D/g,'')) || 0), 0);
             
-            orders.push({ date: new Date().toLocaleDateString(), items: cart, total: total, status: "Ожидает" });
+            // Сохраняем в историю сразу
+            orders.push({ date: new Date().toLocaleDateString(), items: [...cart], total: total, status: "Ожидает" });
             localStorage.setItem('radzhiv_orders', JSON.stringify(orders));
 
             let payload = { action: "checkout", items: cart, promo: promo, total: total };
-            if (tg) { 
-                tg.sendData(JSON.stringify(payload)); 
-                setTimeout(() => { tg.close(); cart = []; localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); updateCartBadge(); }, 300); 
+
+            if (tg && tg.sendData) { 
+                try {
+                    tg.sendData(JSON.stringify(payload)); 
+                    // Если успешно отправили в ТГ, ждем 300мс и закрываем
+                    setTimeout(() => { 
+                        tg.close(); 
+                        cart = []; 
+                        localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
+                        updateCartBadge();
+                        closeCart();
+                    }, 300); 
+                } catch (e) {
+                    alert("Ошибка отправки в Телеграм. Попробуйте еще раз.");
+                    btn.disabled = false;
+                    btn.innerText = "Оформить заказ";
+                }
             } else { 
-                cart = []; localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); updateCartBadge(); closeCart(); alert("Заказ сформирован!"); 
+                // Если открыто в обычном браузере (тест)
+                cart = []; 
+                localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); 
+                updateCartBadge(); 
+                closeCart(); 
+                btn.disabled = false;
+                btn.innerText = "Оформить заказ";
+                alert("✅ Заказ сформирован локально! (В браузере данные в Телеграм не уходят)"); 
             }
         }
 
