@@ -386,17 +386,27 @@
     </div>
 
     <script>
-        const tg = window.Telegram?.WebApp;
-        
-        if (tg) {
-            document.getElementById('tg-blocker').style.display = 'none';
-            document.getElementById('main-content').style.display = 'flex';
-            tg.expand(); 
-            tg.setHeaderColor('#09090b');
-        } else {
-            document.getElementById('tg-blocker').style.display = 'flex';
-            document.getElementById('main-content').style.display = 'none';
-        }
+        // Ждем полной загрузки страницы, чтобы Telegram успел загрузить свой скрипт
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const tg = window.Telegram?.WebApp;
+                
+                if (tg) {
+                    // Внутри Телеграма
+                    document.getElementById('tg-blocker').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'flex';
+                    if (tg.expand) tg.expand(); 
+                    if (tg.setHeaderColor) tg.setHeaderColor('#09090b');
+                    
+                    resetView();
+                    updateCartBadge();
+                } else {
+                    // В обычном браузере
+                    document.getElementById('tg-blocker').style.display = 'flex';
+                    document.getElementById('main-content').style.display = 'none';
+                }
+            }, 800); // Даем 0.8 секунды на инициализацию
+        });
 
         function createRipple(event) {
             const button = event.currentTarget;
@@ -439,6 +449,7 @@
 
         function updateCartBadge() {
             const badge = document.getElementById('cart-badge');
+            if(!badge) return;
             badge.innerText = cart.length;
             if (cart.length > 0) { badge.style.display = 'block'; badge.style.animation = 'none'; badge.offsetHeight; badge.style.animation = 'popIn 0.3s ease'; } else { badge.style.display = 'none'; }
         }
@@ -752,10 +763,6 @@
         }
 
         function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
-
-        if (tg) {
-            setTimeout(() => { resetView(); updateCartBadge(); }, 300);
-        }
     </script>
 </body>
 </html>
