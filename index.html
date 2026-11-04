@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RADZHIV.SHOP | Стильная одежда</title>
+    <title>RADZHIV.SHOP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         /* --- БАЗОВЫЕ ПЕРЕМЕННЫЕ --- */
@@ -38,7 +38,6 @@
             background: rgba(9, 9, 11, 0.7); backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
             position: sticky; top: 0; z-index: 100; 
-            transition: background 0.3s;
         }
         .logo { font-weight: 900; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; color: var(--text); text-decoration: none; }
         
@@ -128,7 +127,10 @@
         .slider-arrow.right { right: 15px; }
 
         .modal-details { flex: 1; padding: 35px; display: flex; flex-direction: column; background: var(--surface); border-radius: 0 24px 24px 0; }
+        .modal-title-row { display: flex; justify-content: space-between; align-items: flex-start; }
         .modal-title { font-size: 28px; font-weight: 900; margin: 0 0 10px 0; line-height: 1.2; }
+        .share-btn { background: transparent; border: none; font-size: 24px; cursor: pointer; padding: 5px; transition: 0.2s; }
+        .share-btn:hover { transform: scale(1.2); }
         .modal-price-row { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
         .modal-price { font-size: 32px; font-weight: 900; color: var(--price); }
         .modal-desc { font-size: 15px; line-height: 1.7; color: var(--muted); margin-bottom: 25px; white-space: pre-wrap; flex-grow: 1; }
@@ -174,6 +176,11 @@
         .empty-state h3 { font-size: 22px; margin: 0 0 10px 0; }
         .empty-state p { color: var(--muted); margin: 0; font-size: 16px; }
 
+        /* --- БЛОК "НЕДАВНО ПРОСМОТРЕННЫЕ" --- */
+        .recently-viewed-wrap { max-width: 1300px; margin: 40px auto; padding: 0 20px; display: none; }
+        .recently-viewed-wrap h3 { font-size: 20px; margin-bottom: 15px; color: var(--muted); }
+        .recently-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+
         /* --- ФУТЕР --- */
         .footer { background: #09090b; padding: 40px 20px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; }
         .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
@@ -199,13 +206,14 @@
             .slider-arrow { display: none; }
             .cart-content { border-radius: 20px 20px 0 0; max-height: 95vh; margin-top: auto; padding: 20px; }
             .footer-links { flex-direction: column; }
+            .recently-grid { grid-template-columns: 1fr 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="top-header">
         <a href="#" class="logo" onclick="resetView(); return false;">RADZHIV.SHOP</a>
-        <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Найти свой стиль..."></div>
+        <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Искать товары..."></div>
         <div class="header-actions">
             <span id="fav-icon" class="icon-btn" onclick="toggleFavView()" title="Избранное">❤️</span>
             <span class="cart-icon icon-btn" onclick="openCart()" title="Корзина">🛒<span class="cart-badge" id="cart-badge">0</span></span>
@@ -226,6 +234,12 @@
         </div>
     </div>
 
+    <!-- НЕДАВНО ПРОСМОТРЕННЫЕ -->
+    <div class="recently-viewed-wrap" id="recently-wrap">
+        <h3>Вы недавно смотрели</h3>
+        <div class="recently-grid" id="recently-grid"></div>
+    </div>
+
     <!-- МОДАЛКА ТОВАРА -->
     <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
         <div class="modal-content">
@@ -237,7 +251,10 @@
                     <button class="slider-arrow right" onclick="moveSlider(1)">❯</button>
                 </div>
                 <div class="modal-details">
-                    <h2 id="modal-title" class="modal-title"></h2>
+                    <div class="modal-title-row">
+                        <h2 id="modal-title" class="modal-title"></h2>
+                        <button class="share-btn" onclick="shareProduct()" title="Поделиться">📤</button>
+                    </div>
                     <div class="modal-price-row">
                         <div id="modal-price" class="modal-price"></div>
                         <div id="modal-old-price" class="old-price"></div>
@@ -278,7 +295,6 @@
                 Я на учебе/работе, поэтому отвечу тебе в Телеграме <b>сегодня вечером</b> или завтра утром. Не переживай, заказ я вижу!
             </p>
             <a href="https://t.me/radzhiv_shop_bot" style="display: block; background: var(--accent); color: white; text-decoration: none; padding: 16px; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 10px; transition: 0.2s;" onmouseover="this.style.background='var(--accent-hover)'" onmouseout="this.style.background='var(--accent)'">Перейти в бота</a>
-            <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4" target="_blank" style="display: block; background: #00AAFF; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: bold; font-size: 15px; margin-bottom: 10px; transition: 0.2s;">Купить безопасно на Авито</a>
             <button class="ask-btn" style="width: 100%;" onclick="closeSuccess()">Закрыть</button>
         </div>
     </div>
@@ -288,9 +304,9 @@
         <div class="footer-links">
             <a href="https://t.me/radzhiv_shop" target="_blank">📢 Наш Telegram-канал</a>
             <a href="https://t.me/radzhivcik" target="_blank">👤 Личный ТГ продавца</a>
-            <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4" target="_blank">🟢 Мы на Авито</a>
+            <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4" target="_blank">🟢 Мы на Авито (Отзывы)</a>
         </div>
-        <p>© 2024 RADZHIV.SHOP. Стильная одежда и аксессуары.</p>
+        <p>© RADZHIV.SHOP. Все права защищены.</p>
     </footer>
 
     <script>
@@ -319,6 +335,7 @@
         
         let cart = JSON.parse(localStorage.getItem('radzhiv_cart')) || [];
         let favorites = JSON.parse(localStorage.getItem('radzhiv_favs')) || [];
+        let recentlyViewed = JSON.parse(localStorage.getItem('radzhiv_viewed')) || [];
         
         let currentSlideIndex = 0;
 
@@ -340,6 +357,25 @@
             } else {
                 badge.style.display = 'none';
             }
+        }
+
+        function renderRecentlyViewed() {
+            const wrap = document.getElementById('recently-wrap');
+            const grid = document.getElementById('recently-grid');
+            if (recentlyViewed.length === 0) { wrap.style.display = 'none'; return; }
+            
+            wrap.style.display = 'block';
+            grid.innerHTML = '';
+            
+            recentlyViewed.forEach(id => {
+                const p = products.find(x => x.id === id);
+                if (!p) return;
+                const el = document.createElement('div');
+                el.className = 'similar-item';
+                el.innerHTML = `<img src="${p.imgs[0]}"><div>${p.name}</div><b>${p.price}</b>`;
+                el.onclick = () => openModal(p);
+                grid.appendChild(el);
+            });
         }
 
         function resetView() {
@@ -417,51 +453,51 @@
                 } else {
                     grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос.</p></div>'; 
                 }
-                return; 
-            }
-            
-            list.forEach((p, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.setAttribute('data-id', p.id);
-                if (!skipAnimation) card.style.animationDelay = `${index * 0.05}s`;
-                else card.style.animation = 'none';
-                
-                if(p.status === 'sold') card.style.opacity = '0.6';
-                
-                let badge = '';
-                if (p.status === 'sold') badge = '<div class="badge sold">Продано</div>';
-                else if (p.old_price && p.old_price !== '') {
-                    let oldP = parseInt(p.old_price.replace(/\D/g,''));
-                    let newP = parseInt(p.price.replace(/\D/g,''));
-                    let disc = oldP > newP ? Math.round((1 - newP/oldP) * 100) : 0;
-                    badge = `<div class="badge">-${disc}%</div>`;
-                }
-                
-                let priceHtml = `<div class="price">${p.price}</div>`;
-                if (p.old_price && p.old_price !== '') priceHtml += `<div class="old-price">${p.old_price}</div>`;
-                
-                let isFav = favorites.includes(p.id) ? 'active' : '';
-                let heartIcon = isFav ? '❤️' : '🤍';
-                let inCart = cart.some(c => c.id === p.id);
-                let btnClass = p.status === 'sold' ? 'disabled' : (inCart ? 'added' : '');
-                let btnText = p.status === 'sold' ? 'Нет в наличии' : (inCart ? 'В корзине' : 'В корзину');
+            } else {
+                list.forEach((p, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.setAttribute('data-id', p.id);
+                    if (!skipAnimation) card.style.animationDelay = `${index * 0.05}s`;
+                    else card.style.animation = 'none';
+                    
+                    if(p.status === 'sold') card.style.opacity = '0.6';
+                    
+                    let badge = '';
+                    if (p.status === 'sold') badge = '<div class="badge sold">Продано</div>';
+                    else if (p.old_price && p.old_price !== '') {
+                        let oldP = parseInt(p.old_price.replace(/\D/g,''));
+                        let newP = parseInt(p.price.replace(/\D/g,''));
+                        let disc = oldP > newP ? Math.round((1 - newP/oldP) * 100) : 0;
+                        badge = `<div class="badge">-${disc}%</div>`;
+                    }
+                    
+                    let priceHtml = `<div class="price">${p.price}</div>`;
+                    if (p.old_price && p.old_price !== '') priceHtml += `<div class="old-price">${p.old_price}</div>`;
+                    
+                    let isFav = favorites.includes(p.id) ? 'active' : '';
+                    let heartIcon = isFav ? '❤️' : '🤍';
+                    let inCart = cart.some(c => c.id === p.id);
+                    let btnClass = p.status === 'sold' ? 'disabled' : (inCart ? 'added' : '');
+                    let btnText = p.status === 'sold' ? 'Нет в наличии' : (inCart ? 'В корзине' : 'В корзину');
 
-                card.innerHTML = `
-                    <div class="card-img-wrapper">
-                        ${badge}
-                        <div class="heart ${isFav}" onclick="toggleFav(${p.id}, event)">${heartIcon}</div>
-                        <img src="${p.imgs[0]}" loading="lazy">
-                    </div>
-                    <div class="card-info">
-                        <div class="title">${p.name}</div>
-                        <div class="price-row">${priceHtml}</div>
-                        <button class="buy-btn ${btnClass}" onclick="event.stopPropagation(); addToCart(${p.id}, event)">${btnText}</button>
-                    </div>
-                `;
-                card.onclick = () => openModal(p);
-                grid.appendChild(card);
-            });
+                    card.innerHTML = `
+                        <div class="card-img-wrapper">
+                            ${badge}
+                            <div class="heart ${isFav}" onclick="toggleFav(${p.id}, event)">${heartIcon}</div>
+                            <img src="${p.imgs[0]}" loading="lazy">
+                        </div>
+                        <div class="card-info">
+                            <div class="title">${p.name}</div>
+                            <div class="price-row">${priceHtml}</div>
+                            <button class="buy-btn ${btnClass}" onclick="event.stopPropagation(); addToCart(${p.id}, event)">${btnText}</button>
+                        </div>
+                    `;
+                    card.onclick = () => openModal(p);
+                    grid.appendChild(card);
+                });
+            }
+            renderRecentlyViewed();
         }
 
         function updateCardButton(id, inCart) {
@@ -489,6 +525,13 @@
             currentProduct = p;
             selectedSize = "";
             currentSlideIndex = 0;
+            
+            // Добавляем в недавно просмотренные
+            recentlyViewed = recentlyViewed.filter(id => id !== p.id);
+            recentlyViewed.unshift(p.id);
+            if (recentlyViewed.length > 4) recentlyViewed.pop();
+            localStorage.setItem('radzhiv_viewed', JSON.stringify(recentlyViewed));
+            renderRecentlyViewed();
             
             const slider = document.getElementById('modal-slider');
             slider.innerHTML = '';
@@ -547,6 +590,17 @@
         }
 
         function closeModal() { modal.classList.remove('show'); document.body.style.overflow = 'auto'; currentProduct = null; }
+
+        function shareProduct() {
+            if (!currentProduct) return;
+            const text = `Глянь эту вещь в RADZHIV.SHOP: ${currentProduct.name} за ${currentProduct.price}!`;
+            const url = "https://radzhivcik.github.io/radzhiv-shop/";
+            if (tg) {
+                tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`);
+            } else {
+                alert(`Скопируй ссылку: ${url}`);
+            }
+        }
 
         function addToCart(id, event) {
             if(event) createRipple(event);
@@ -627,7 +681,6 @@
             if(event) createRipple(event);
             if (cart.length === 0) return;
             
-            // Блокируем кнопку от двойного клика
             const btn = document.getElementById('checkout-btn');
             btn.disabled = true;
             btn.innerText = "Отправка...";
@@ -657,8 +710,8 @@
         function closeSuccess() { document.getElementById('successModal').classList.remove('show'); }
 
         function askQuestion() {
-            if(tg) tg.openTelegramLink("https://t.me/radzhivcik");
-            else window.location.href = "https://t.me/radzhivcik";
+            if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_bot");
+            else window.location.href = "https://t.me/radzhiv_shop_bot";
         }
 
         setTimeout(() => { resetView(); updateCartBadge(); }, 300);
