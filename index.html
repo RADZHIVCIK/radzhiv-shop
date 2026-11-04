@@ -14,9 +14,10 @@
             --card: #1f1f23; 
             --text: #f4f4f5; 
             --muted: #a1a1aa; 
-            --accent: #3b82f6; /* Более яркий синий */
+            --accent: #3b82f6;
             --accent-hover: #2563eb;
             --price: #ef4444;
+            --success: #10b981;
             --radius: 16px;
         }
         
@@ -27,6 +28,9 @@
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(10px); }
         }
         @keyframes popIn {
             0% { transform: scale(0.8); opacity: 0; }
@@ -107,7 +111,7 @@
         /* Сердечко */
         .heart { position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; z-index: 10; transition: 0.2s; }
         .heart:hover { background: rgba(0,0,0,0.9); }
-        .heart.active { color: var(--price); animation: popIn 0.4s ease; }
+        .heart.active { color: var(--price); }
         
         /* Информация */
         .card-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
@@ -125,6 +129,8 @@
         .buy-btn:hover { background: var(--accent-hover); }
         .buy-btn:active { transform: scale(0.96); }
         .buy-btn.disabled { background: #3f3f46; color: #a1a1aa; pointer-events: none; }
+        .buy-btn.added { background: var(--success); }
+        .buy-btn.added:hover { background: #059669; }
         
         /* Ripple Effect */
         .ripple { position: absolute; border-radius: 50%; transform: scale(0); animation: ripple 0.6s linear; background-color: rgba(255, 255, 255, 0.4); pointer-events: none; }
@@ -168,6 +174,7 @@
         }
         .modal-buy-btn:hover { background: var(--accent-hover); }
         .modal-buy-btn:active { transform: scale(0.98); }
+        .modal-buy-btn.disabled { background: #3f3f46; color: #a1a1aa; pointer-events: none; }
         .ask-btn { background: #27272a; color: white; border: none; padding: 18px; border-radius: 14px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.2s; }
         .ask-btn:hover { background: #3f3f46; }
 
@@ -383,18 +390,33 @@
             updateView();
         }
 
+        // ИСПРАВЛЕНО: Умный клик по сердечку без перерендера всей сетки
         function toggleFav(id, event) {
             event.stopPropagation();
+            const heart = event.currentTarget;
+            
             if (favorites.includes(id)) {
                 favorites = favorites.filter(f => f !== id);
+                heart.classList.remove('active');
+                heart.innerHTML = '🤍';
+                
+                // Если мы в режиме "Избранное", плавно убираем карточку
+                if (showFavoritesOnly) {
+                    const card = heart.closest('.card');
+                    card.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => updateView(), 300);
+                }
             } else {
                 favorites.push(id);
+                heart.classList.add('active');
+                heart.innerHTML = '❤️';
+                heart.style.animation = 'popIn 0.4s ease';
             }
             localStorage.setItem('radzhiv_favs', JSON.stringify(favorites));
-            updateView();
         }
 
-        function updateView() {
+        // ИСПРАВЛЕНО: Добавлен флаг skipAnimation чтобы не дергалась сетка при добавлении в корзину
+        function updateView(skipAnimation = false) {
             let list = products;
             
             if (showFavoritesOnly) {
@@ -428,8 +450,13 @@
             list.forEach((p, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                // Задержка для каскадной анимации
-                card.style.animationDelay = `${index * 0.05}s`;
+                card.setAttribute('data-id', p.id);
+                
+                if (!skipAnimation) {
+                    card.style.animationDelay = `${index * 0.05}s`;
+                } else {
+                    card.style.animation = 'none'; // Отключаем анимацию появления
+                }
                 
                 if(p.status === 'sold') card.style.opacity = '0.6';
                 
@@ -447,6 +474,11 @@
                 
                 let isFav = favorites.includes(p.id) ? 'active' : '';
                 let heartIcon = isFav ? '❤️' : '🤍';
+                
+                // Проверяем, есть ли товар уже в корзине
+                let inCart = cart.some(c => c.id === p.id);
+                let btnClass = p.status === 'sold' ? 'disabled' : (inCart ? 'added' : '');
+                let btnText = p.status === 'sold' ? 'Нет в наличии' : (inCart ? 'В корзине' : 'В корзину');
 
                 card.innerHTML = `
                     <div class="card-img-wrapper">
@@ -457,7 +489,7 @@
                     <div class="card-info">
                         <div class="title">${p.name}</div>
                         <div class="price-row">${priceHtml}</div>
-                        <button class="buy-btn ${p.status === 'sold' ? 'disabled' : ''}" onclick="event.stopPropagation(); addToCart(${p.id}, event)">${p.status === 'sold' ? 'Нет в наличии' : 'В корзину'}</button>
+                        <button class="buy-btn ${btnClass}" onclick="event.stopPropagation(); addToCart(${p.id}, event)">${btnText}</button>
                     </div>
                 `;
                 card.onclick = () => openModal(p);
@@ -465,7 +497,24 @@
             });
         }
 
-        searchInput.addEventListener('input', updateView);
+        // ИСПРАВЛЕНО: Обновление только одной кнопки (без перерендера всей сетки)
+        function updateCardButton(id, inCart) {
+            const card = document.querySelector(`.card[data-id="${id}"]`);
+            if (card) {
+                const btn = card.querySelector('.buy-btn');
+                if (btn && !btn.classList.contains('disabled')) {
+                    if (inCart) {
+                        btn.classList.add('added');
+                        btn.innerText = 'В корзине';
+                    } else {
+                        btn.classList.remove('added');
+                        btn.innerText = 'В корзину';
+                    }
+                }
+            }
+        }
+
+        searchInput.addEventListener('input', () => updateView());
 
         function moveSlider(direction) {
             const slider = document.getElementById('modal-slider');
@@ -508,18 +557,36 @@
 
             const simGrid = document.getElementById('similar-grid');
             simGrid.innerHTML = '';
-            const similar = products.filter(x => x.category === p.category && x.id !== p.id && x.status !== 'sold').slice(0, 4);
-            similar.forEach(sim => {
-                const el = document.createElement('div');
-                el.className = 'similar-item';
-                el.innerHTML = `<img src="${sim.imgs[0]}"><div>${sim.name}</div><b>${sim.price}</b>`;
-                el.onclick = () => openModal(sim);
-                simGrid.appendChild(el);
-            });
+            
+            // ИСПРАВЛЕНО: Умный подбор похожих товаров
+            let similar = products.filter(x => x.category === p.category && x.id !== p.id && x.status !== 'sold');
+            if (similar.length === 0) {
+                // Если в категории пусто, берем любые другие товары
+                similar = products.filter(x => x.id !== p.id && x.status !== 'sold');
+            }
+            similar = similar.slice(0, 4); // Берем максимум 4
+            
+            if (similar.length > 0) {
+                similar.forEach(sim => {
+                    const el = document.createElement('div');
+                    el.className = 'similar-item';
+                    el.innerHTML = `<img src="${sim.imgs[0]}"><div>${sim.name}</div><b>${sim.price}</b>`;
+                    el.onclick = () => openModal(sim);
+                    simGrid.appendChild(el);
+                });
+            } else {
+                simGrid.innerHTML = '<div style="color:var(--muted); font-size:14px; grid-column:1/-1;">Пока нет других товаров.</div>';
+            }
             
             const buyBtn = document.getElementById('modal-buy');
-            if (p.status === 'sold') { buyBtn.innerText = 'Нет в наличии'; buyBtn.className = 'modal-buy-btn disabled'; buyBtn.disabled = true; }
-            else { buyBtn.innerText = 'В корзину'; buyBtn.className = 'modal-buy-btn'; buyBtn.disabled = false; }
+            if (p.status === 'sold') { 
+                buyBtn.innerText = 'Нет в наличии'; buyBtn.className = 'modal-buy-btn disabled'; buyBtn.disabled = true; 
+            } else { 
+                let inCart = cart.some(c => c.id === p.id);
+                buyBtn.innerText = inCart ? 'В корзине' : 'В корзину'; 
+                buyBtn.className = inCart ? 'modal-buy-btn added' : 'modal-buy-btn'; 
+                buyBtn.disabled = false; 
+            }
             
             modal.classList.add('show'); document.body.style.overflow = 'hidden';
         }
@@ -553,6 +620,9 @@
             localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
             updateCartBadge();
             if(tg) tg.HapticFeedback.notificationOccurred('success');
+            
+            // ИСПРАВЛЕНО: Обновляем только кнопку конкретного товара, не трогая всю сетку
+            updateCardButton(p.id, true);
         }
 
         function openCart() {
@@ -564,6 +634,7 @@
                 total += numPrice;
                 const div = document.createElement('div');
                 div.className = 'cart-item';
+                // ИСПРАВЛЕНО: Передаем event для анимации и предотвращения багов
                 div.innerHTML = `
                     <img src="${item.img}">
                     <div class="cart-item-info">
@@ -571,7 +642,7 @@
                         <div style="font-size:12px; color:var(--muted);">Размер: ${item.size}</div>
                         <span>${item.price}</span>
                     </div>
-                    <button style="background:var(--price); border:none; color:white; padding:10px; border-radius:10px; cursor:pointer; transition:0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="removeFromCart(${idx})">✖</button>
+                    <button style="background:var(--price); border:none; color:white; padding:10px; border-radius:10px; cursor:pointer; transition:0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" onclick="removeFromCart(${idx}, event)">✖</button>
                 `;
                 wrap.appendChild(div);
             });
@@ -582,11 +653,30 @@
 
         function closeCart() { document.getElementById('cartModal').classList.remove('show'); }
 
-        function removeFromCart(idx) {
-            cart.splice(idx, 1);
-            localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
-            updateCartBadge();
-            openCart();
+        // ИСПРАВЛЕНО: Анимация удаления, защита от двойного клика и бага "удаления всего"
+        function removeFromCart(idx, event) {
+            const btn = event.currentTarget;
+            if (btn.disabled) return; // Защита от дабл-клика
+            btn.disabled = true;
+            
+            const cartItemDiv = btn.closest('.cart-item');
+            cartItemDiv.style.animation = 'fadeOut 0.3s ease forwards'; // Плавное исчезновение
+            
+            setTimeout(() => {
+                const removedItem = cart[idx];
+                cart.splice(idx, 1);
+                localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
+                updateCartBadge();
+                openCart(); // Перерисовываем корзину после анимации
+                
+                if (removedItem) {
+                    // Проверяем, остались ли еще такие же товары в корзине
+                    const stillInCart = cart.some(c => c.id === removedItem.id);
+                    if (!stillInCart) {
+                        updateCardButton(removedItem.id, false); // Возвращаем кнопку "В корзину" на главной
+                    }
+                }
+            }, 300);
         }
 
         function checkout(event) {
