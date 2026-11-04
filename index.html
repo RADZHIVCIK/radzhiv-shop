@@ -386,26 +386,34 @@
     </div>
 
     <script>
-        // Ждем полной загрузки страницы, чтобы Telegram успел загрузить свой скрипт
+        // УМНАЯ ПРОВЕРКА ТЕЛЕГРАМА (Ждем до 3 секунд)
         window.addEventListener('load', function() {
-            setTimeout(function() {
+            let attempts = 0;
+            const maxAttempts = 20; // 20 * 150ms = 3 секунды
+            
+            const tgCheck = setInterval(function() {
                 const tg = window.Telegram?.WebApp;
+                attempts++;
                 
-                if (tg) {
-                    // Внутри Телеграма
+                if (tg) { 
+                    // Телеграм найден!
+                    clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'none';
                     document.getElementById('main-content').style.display = 'flex';
+                    
                     if (tg.expand) tg.expand(); 
                     if (tg.setHeaderColor) tg.setHeaderColor('#09090b');
+                    if (tg.ready) tg.ready();
                     
                     resetView();
                     updateCartBadge();
-                } else {
-                    // В обычном браузере
+                } else if (attempts >= maxAttempts) {
+                    // Прошло 3 секунды, Телеграма нет — значит это браузер
+                    clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'flex';
                     document.getElementById('main-content').style.display = 'none';
                 }
-            }, 800); // Даем 0.8 секунды на инициализацию
+            }, 150);
         });
 
         function createRipple(event) {
@@ -745,6 +753,7 @@
 
             let payload = { action: "checkout", items: cart, promo: promo, total: total };
 
+            const tg = window.Telegram?.WebApp;
             if (tg && tg.sendData) { 
                 try {
                     tg.sendData(JSON.stringify(payload)); 
