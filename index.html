@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RADZHIV.SHOP</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg: var(--tg-theme-bg-color, #121212); --text: var(--tg-theme-text-color, #ffffff); --hint: var(--tg-theme-hint-color, #888888); --btn: var(--tg-theme-button-color, #3390ec); --btn-text: var(--tg-theme-button-text-color, #ffffff); --card-bg: var(--tg-theme-secondary-bg-color, #1e1e1e); }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; padding-bottom: 80px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { font-weight: 900; font-size: 26px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 15px; scrollbar-width: none; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-btn { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05); color: var(--text); padding: 10px 18px; border-radius: 20px; font-weight: 600; font-size: 14px; cursor: pointer; white-space: nowrap; }
+        .cat-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
+        .search-box { width: 100%; padding: 14px 18px; border-radius: 14px; border: none; background: var(--card-bg); color: var(--text); font-size: 16px; margin-bottom: 25px; outline: none; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; cursor: pointer; position: relative; overflow: hidden; transition: transform 0.15s ease; }
+        .card:active { transform: scale(0.97); }
+        .card img { width: 100%; border-radius: 12px; aspect-ratio: 1/1; object-fit: cover; margin-bottom: 12px; background: #2a2a2a; }
+        .badge { position: absolute; top: 20px; left: 20px; background: #ff3b30; color: white; font-size: 10px; font-weight: 900; padding: 5px 10px; border-radius: 8px; text-transform: uppercase; z-index: 10; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .badge.sold { background: #555; }
+        .badge.preorder { background: #ff9800; }
+        .title { font-size: 15px; font-weight: 700; margin: 0 0 6px 0; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .price-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; margin-top: auto; }
+        .price { font-size: 18px; font-weight: 900; }
+        .old-price { font-size: 14px; text-decoration: line-through; color: var(--hint); }
+        .buy-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 15px; width: 100%; cursor: pointer; }
+        .buy-btn.disabled { background: #333; color: #777; pointer-events: none; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; align-items: flex-end; }
+        .modal-content { background: var(--bg); width: 100%; border-radius: 24px 24px 0 0; padding: 24px; max-height: 90vh; overflow-y: auto; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; border-radius: 16px; margin-bottom: 25px; scrollbar-width: none; }
+        .slider::-webkit-scrollbar { display: none; }
+        .slider img { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 1/1; object-fit: cover; border-radius: 16px; }
+        .modal-title { font-size: 24px; font-weight: 900; margin: 0 0 12px 0; line-height: 1.2; }
+        .modal-price-row { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .modal-price { font-size: 28px; font-weight: 900; color: var(--btn); }
+        .modal-desc { font-size: 16px; line-height: 1.6; color: var(--text); margin-bottom: 30px; white-space: pre-wrap; opacity: 0.9; }
+        .close-btn { background: var(--card-bg); color: var(--text); border: none; padding: 18px; border-radius: 16px; font-weight: 800; width: 100%; margin-top: 15px; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="header"><div class="logo">RADZHIV.SHOP</div></div>
+    <div class="categories" id="categories-container"></div>
+    <input type="text" id="search" class="search-box" placeholder="Поиск по магазину...">
+    <div class="grid" id="product-grid"></div>
+    <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
+        <div class="modal-content">
+            <div class="slider" id="modal-slider"></div>
+            <h2 id="modal-title" class="modal-title"></h2>
+            <div class="modal-price-row">
+                <div id="modal-price" class="modal-price"></div>
+                <div id="modal-old-price" class="old-price"></div>
+            </div>
+            <div id="modal-desc" class="modal-desc"></div>
+            <button class="buy-btn" id="modal-buy" onclick="buyFromModal()">Оформить заказ</button>
+            <button class="close-btn" onclick="closeModal()">Вернуться в каталог</button>
+        </div>
+    </div>
+    <script>
+        const tg = window.Telegram?.WebApp;
+        if (tg) { tg.expand(); tg.setHeaderColor('#121212'); }
+        const products = [{"id": 1, "name": "👔 КЛАССИЧЕСКИЙ ИТАЛЬЯНСКИЙ ПИДЖАК ENRICO MARINELLI 👔", "price": "500", "old_price": "", "category": "Верхняя одежда", "status": "instock", "desc": "Товар Б/У\nБренд: Enrico Marinelli (Италия)\nЦвет: Классический серый\nМатериал: Натуральная шерсть с добавлением шёлка (Wool & Silk) \nСостояние: Хорошее\n📏 Точные замеры:\nПлечи — 50 см\nПолуобхват груди — 56 см\nРукав от плеча — 61 см\nДлина по спине от воротника — 78 см\n⚠️ Нюанс: есть несколько небольших следов от ручки (лёгкие чирки). Они практически незаметны, видно только при детальном осмотре.", "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg", "img/1_img_4.jpg", "img/1_img_5.jpg"]}, {"id": 2, "name": "🧥 МУЖСКАЯ ЧЁРНАЯ ХУДИ 🧥", "price": "450", "old_price": "", "category": "Кофты", "status": "instock", "desc": "Товар Б/У\nРазмер: S\nЦвет: Чёрный\nСостояние: Хорошее\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg", "img/2_img_2.jpg", "img/2_img_3.jpg", "img/2_img_4.jpg"]}, {"id": 3, "name": "🩳 ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ 🩳", "price": "700", "old_price": "", "category": "Шорты", "status": "instock", "desc": "Новые, только примерялись. \n\nРазмер: S\nЦвет: Чёрный\nСостояние: Новое (без упаковки и бирок)\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg", "img/3_img_3.jpg", "img/3_img_4.jpg"]}, {"id": 4, "name": "👕ПЛОТНАЯ МУСКАЯ ФУТБОЛКА 👕", "price": "500", "old_price": "", "category": "Футболки", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.\nРазмер: S\nЦвет: Чёрный", "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg"]}, {"id": 5, "name": "🧥УДЛИНЕННАЯ ВЕТРОВКА O'STIN! 🧥", "price": "700", "old_price": "", "category": "Куртки", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nРазмер: 44 (S/M)\nЦвет: Синий\nСезон: Демисезон\nМатериал: Полиэстер\nСостояние: Хорошее\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "imgs": ["img/5_img_0.jpg", "img/5_img_1.jpg", "img/5_img_2.jpg"]}];
+        let currentProduct = null;
+        let currentCategory = 'Все';
+        const grid = document.getElementById('product-grid');
+        const searchInput = document.getElementById('search');
+        const modal = document.getElementById('productModal');
+        const catContainer = document.getElementById('categories-container');
+        function initCategories() {
+            const cats = ['Все', ...new Set(products.map(p => p.category).filter(Boolean))];
+            catContainer.innerHTML = '';
+            cats.forEach(c => {
+                const btn = document.createElement('button');
+                btn.className = `cat-btn ${c === currentCategory ? 'active' : ''}`;
+                btn.innerText = c;
+                btn.onclick = () => { currentCategory = c; initCategories(); filterProducts(); };
+                catContainer.appendChild(btn);
+            });
+        }
+        function filterProducts() {
+            const term = searchInput.value.toLowerCase();
+            let filtered = products;
+            if (currentCategory !== 'Все') filtered = filtered.filter(p => p.category === currentCategory);
+            if (term) filtered = filtered.filter(p => p.name.toLowerCase().includes(term));
+            renderProducts(filtered);
+        }
+        function renderProducts(items) {
+            grid.innerHTML = '';
+            if (items.length === 0) { grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">Ничего не найдено</p>'; return; }
+            items.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                if(p.status === 'sold') card.style.opacity = '0.6';
+                let badge = '';
+                if (p.status === 'sold') badge = '<div class="badge sold">Продано</div>';
+                else if (p.old_price && p.old_price !== '') badge = '<div class="badge">SALE</div>';
+                else if (p.status === 'preorder') badge = '<div class="badge preorder">Под заказ</div>';
+                let priceHtml = `<div class="price">${p.price}</div>`;
+                if (p.old_price && p.old_price !== '') priceHtml += `<div class="old-price">${p.old_price}</div>`;
+                card.innerHTML = `
+                    ${badge}
+                    <img src="${p.imgs[0]}" loading="lazy">
+                    <div class="title">${p.name}</div>
+                    <div class="price-row">${priceHtml}</div>
+                    <button class="buy-btn ${p.status === 'sold' ? 'disabled' : ''}" onclick="event.stopPropagation(); fastBuy(${p.id})">${p.status === 'sold' ? 'Нет в наличии' : 'Купить'}</button>
+                `;
+                card.onclick = () => openModal(p);
+                grid.appendChild(card);
+            });
+        }
+        searchInput.addEventListener('input', filterProducts);
+        function openModal(p) {
+            currentProduct = p;
+            const slider = document.getElementById('modal-slider');
+            slider.innerHTML = '';
+            p.imgs.forEach(src => { const img = document.createElement('img'); img.src = src; slider.appendChild(img); });
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-price').innerText = p.price;
+            document.getElementById('modal-old-price').innerText = (p.old_price && p.old_price !== '') ? p.old_price : '';
+            document.getElementById('modal-desc').innerText = p.desc || 'Описание отсутствует.';
+            const buyBtn = document.getElementById('modal-buy');
+            if (p.status === 'sold') { buyBtn.innerText = 'Нет в наличии'; buyBtn.className = 'buy-btn disabled'; }
+            else { buyBtn.innerText = 'Оформить заказ'; buyBtn.className = 'buy-btn'; }
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() { modal.style.display = 'none'; document.body.style.overflow = 'auto'; currentProduct = null; }
+        function fastBuy(id) { processBuy(products.find(x => x.id === id)); }
+        function buyFromModal() { if (currentProduct && currentProduct.status !== 'sold') processBuy(currentProduct); }
+        function processBuy(p) {
+            if (!p || p.status === 'sold') return;
+            if (tg) { tg.HapticFeedback.impactOccurred('medium'); tg.sendData(JSON.stringify({ action: "buy", id: p.id, name: p.name, price: p.price })); setTimeout(() => tg.close(), 300); }
+            else { alert(`Вы выбрали: ${p.name} (${p.price}).
+
+Оформите заказ в боте: @radzhiv_shop_bot`); window.location.href = "https://t.me/radzhiv_shop_bot"; }
+        }
+        initCategories();
+        renderProducts(products);
+    </script>
+</body>
+</html>
