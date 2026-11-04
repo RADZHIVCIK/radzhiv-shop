@@ -651,20 +651,18 @@
         }
         function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
-               function checkout(event) {
+                function checkout(event) {
             if(event) createRipple(event);
             if (cart.length === 0) return;
             const btn = document.getElementById('checkout-btn'); 
             
-            // Защита от спама
-            if (btn.disabled) return; 
+            if (btn.disabled) return; // Защита от дабл-клика
             btn.disabled = true; 
             btn.innerText = "Отправка...";
 
             let promo = document.getElementById('promo-input').value;
             let total = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/\D/g,'')) || 0), 0);
             
-            // Сохраняем в историю сразу
             orders.push({ date: new Date().toLocaleDateString(), items: [...cart], total: total, status: "Ожидает" });
             localStorage.setItem('radzhiv_orders', JSON.stringify(orders));
 
@@ -673,31 +671,32 @@
             if (tg && tg.sendData) { 
                 try {
                     tg.sendData(JSON.stringify(payload)); 
-                    // Если успешно отправили в ТГ, ждем 300мс и закрываем
                     setTimeout(() => { 
                         tg.close(); 
                         cart = []; 
                         localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
-                        updateCartBadge();
+                        updateCartBadge(); 
+                        updateView(); // ОБНОВЛЯЕТ КАРТОЧКИ ТОВАРОВ
                         closeCart();
+                        btn.disabled = false; 
+                        btn.innerText = "Оформить заказ"; 
                     }, 300); 
                 } catch (e) {
-                    alert("Ошибка отправки в Телеграм. Попробуйте еще раз.");
+                    alert("Ошибка отправки в Телеграм.");
                     btn.disabled = false;
                     btn.innerText = "Оформить заказ";
                 }
             } else { 
-                // Если открыто в обычном браузере (тест)
                 cart = []; 
                 localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); 
                 updateCartBadge(); 
+                updateView(); // ОБНОВЛЯЕТ КАРТОЧКИ ТОВАРОВ
                 closeCart(); 
                 btn.disabled = false;
                 btn.innerText = "Оформить заказ";
                 alert("✅ Заказ сформирован локально! (В браузере данные в Телеграм не уходят)"); 
             }
         }
-
         function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
 
         setTimeout(() => { resetView(); updateCartBadge(); }, 300);
