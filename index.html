@@ -10,6 +10,23 @@
         :root { --bg: #09090b; --surface: #18181b; --card: #1f1f23; --text: #f4f4f5; --muted: #a1a1aa; --accent: #3b82f6; --accent-hover: #2563eb; --price: #ef4444; --success: #10b981; --radius: 16px; }
         * { box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
+        /* TG BLOCKER */
+        #tg-blocker { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at 50% 0%, #1f1f27 0%, var(--bg) 80%); 
+            z-index: 99999; flex-direction: column; align-items: center; justify-content: center; 
+            text-align: center; padding: 20px; 
+        }
+        #tg-blocker .icon { font-size: 80px; margin-bottom: 20px; }
+        #tg-blocker h1 { color: #fff; margin: 0 0 15px 0; font-size: 28px; }
+        #tg-blocker p { color: var(--muted); margin-bottom: 30px; font-size: 16px; max-width: 400px; line-height: 1.5; }
+        #tg-blocker a { 
+            background: var(--accent); color: white; text-decoration: none; 
+            padding: 16px 32px; border-radius: 12px; font-weight: bold; font-size: 16px; 
+            transition: 0.2s; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+        #tg-blocker a:hover { background: var(--accent-hover); transform: scale(1.05); }
+
         /* Background & Particles */
         body { background: radial-gradient(circle at 50% 0%, #1f1f27 0%, var(--bg) 80%); color: var(--text); margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; position: relative; }
         
@@ -233,132 +250,153 @@
     </style>
 </head>
 <body>
-    <!-- Фоновые частицы -->
-    <div class="bg-orb orb-1"></div>
-    <div class="bg-orb orb-2"></div>
-
-    <div class="top-header">
-        <a href="#" class="logo" onclick="resetView(); return false;">RADZHIV.SHOP</a>
-        <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Искать..." oninput="updateView()"></div>
-        <div class="header-actions">
-            <span class="icon-btn" onclick="openOrders()">📦</span>
-            <span class="icon-btn" onclick="toggleFavView()" id="fav-icon">❤️</span>
-            <span class="icon-btn" onclick="openCart()">🛒<span class="cart-badge" id="cart-badge">0</span></span>
-        </div>
-    </div>
-    
-    <div class="page-title-wrap">
-        <h1 class="page-title" id="page-title">Каталог</h1>
-        <div class="action-btns">
-            <button class="how-to-btn" onclick="openFilters()">☰ Фильтры</button>
-            <button class="how-to-btn" onclick="openHowItWorks()">❓ Как заказать</button>
-        </div>
+    <!-- Блокировка для обычных браузеров -->
+    <div id="tg-blocker">
+        <div class="icon">🔒</div>
+        <h1>Доступно только в Telegram</h1>
+        <p>Наш магазин работает внутри Telegram для вашей безопасности и удобства оформления заказа.</p>
+        <a href="https://t.me/radzhiv_shop_bot">Открыть магазин в Telegram</a>
     </div>
 
-    <div class="container"><div class="grid" id="product-grid"></div></div>
+    <!-- Основной контент -->
+    <div id="main-content" style="display: none; flex-direction: column; min-height: 100vh;">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
 
-    <div class="modal" id="filterModal" onclick="if(event.target===this) closeFilters()">
-        <div class="modal-content" style="max-width: 400px; padding: 25px;">
-            <button class="modal-close" onclick="closeFilters()">✕</button>
-            <h2 style="margin-top:0;">Фильтры</h2>
-            
-            <div class="filter-group">
-                <h4 style="margin-bottom:10px; color:var(--muted);">Категории</h4>
-                <div class="filter-cats" id="filter-cats-container"></div>
+        <div class="top-header">
+            <a href="#" class="logo" onclick="resetView(); return false;">RADZHIV.SHOP</a>
+            <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Искать..." oninput="updateView()"></div>
+            <div class="header-actions">
+                <span class="icon-btn" onclick="openOrders()">📦</span>
+                <span class="icon-btn" onclick="toggleFavView()" id="fav-icon">❤️</span>
+                <span class="icon-btn" onclick="openCart()">🛒<span class="cart-badge" id="cart-badge">0</span></span>
             </div>
-            
-            <div class="filter-group">
-                <h4 style="margin-bottom:10px; color:var(--muted);">Размеры</h4>
-                <div class="filter-sizes" id="filter-sizes-container"></div>
+        </div>
+        
+        <div class="page-title-wrap">
+            <h1 class="page-title" id="page-title">Каталог</h1>
+            <div class="action-btns">
+                <button class="how-to-btn" onclick="openFilters()">☰ Фильтры</button>
+                <button class="how-to-btn" onclick="openHowItWorks()">❓ Как заказать</button>
             </div>
-            
-            <div class="filter-group">
-                <h4 style="margin-bottom:10px; color:var(--muted);">Состояние</h4>
-                <div class="filter-conditions" id="filter-conditions-container"></div>
-            </div>
+        </div>
 
-            <div class="filter-group" style="margin-bottom:20px;">
-                <h4 style="margin-bottom:10px; color:var(--muted);">Цена (₽)</h4>
-                <div style="display:flex; gap:10px;">
-                    <input type="number" id="price-min" placeholder="От" oninput="applyFilters()" style="width:100%; padding:10px; background:rgba(24,24,27,0.6); border:1px solid #3f3f46; color:white; border-radius:8px;">
-                    <input type="number" id="price-max" placeholder="До" oninput="applyFilters()" style="width:100%; padding:10px; background:rgba(24,24,27,0.6); border:1px solid #3f3f46; color:white; border-radius:8px;">
+        <div class="container"><div class="grid" id="product-grid"></div></div>
+
+        <div class="modal" id="filterModal" onclick="if(event.target===this) closeFilters()">
+            <div class="modal-content" style="max-width: 400px; padding: 25px;">
+                <button class="modal-close" onclick="closeFilters()">✕</button>
+                <h2 style="margin-top:0;">Фильтры</h2>
+                
+                <div class="filter-group">
+                    <h4 style="margin-bottom:10px; color:var(--muted);">Категории</h4>
+                    <div class="filter-cats" id="filter-cats-container"></div>
+                </div>
+                
+                <div class="filter-group">
+                    <h4 style="margin-bottom:10px; color:var(--muted);">Размеры</h4>
+                    <div class="filter-sizes" id="filter-sizes-container"></div>
+                </div>
+                
+                <div class="filter-group">
+                    <h4 style="margin-bottom:10px; color:var(--muted);">Состояние</h4>
+                    <div class="filter-conditions" id="filter-conditions-container"></div>
+                </div>
+
+                <div class="filter-group" style="margin-bottom:20px;">
+                    <h4 style="margin-bottom:10px; color:var(--muted);">Цена (₽)</h4>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="price-min" placeholder="От" oninput="applyFilters()" style="width:100%; padding:10px; background:rgba(24,24,27,0.6); border:1px solid #3f3f46; color:white; border-radius:8px;">
+                        <input type="number" id="price-max" placeholder="До" oninput="applyFilters()" style="width:100%; padding:10px; background:rgba(24,24,27,0.6); border:1px solid #3f3f46; color:white; border-radius:8px;">
+                    </div>
+                </div>
+                
+                <button class="buy-btn" onclick="closeFilters()">Применить</button>
+                <button class="reset-btn" onclick="resetFilters()">Сбросить фильтры</button>
+            </div>
+        </div>
+
+        <div class="modal" id="howItWorksModal" onclick="if(event.target===this) closeHowItWorks()">
+            <div class="modal-content" style="max-width: 450px; padding: 25px;">
+                <button class="modal-close" onclick="closeHowItWorks()">✕</button>
+                <h2 style="margin-top:0;">Как заказать?</h2>
+                <div style="line-height: 1.6; color: var(--text); font-size: 14px;">
+                    <p>1. Выбираете вещи в корзину.</p>
+                    <p>2. Нажимаете «Оформить».</p>
+                    <p>3. Я пишу вам вечером.</p>
+                    <p>4. Оплата СБП или Авито.</p>
+                    <p>5. Отправка СДЭК.</p>
                 </div>
             </div>
-            
-            <button class="buy-btn" onclick="closeFilters()">Применить</button>
-            <button class="reset-btn" onclick="resetFilters()">Сбросить фильтры</button>
         </div>
-    </div>
 
-    <div class="modal" id="howItWorksModal" onclick="if(event.target===this) closeHowItWorks()">
-        <div class="modal-content" style="max-width: 450px; padding: 25px;">
-            <button class="modal-close" onclick="closeHowItWorks()">✕</button>
-            <h2 style="margin-top:0;">Как заказать?</h2>
-            <div style="line-height: 1.6; color: var(--text); font-size: 14px;">
-                <p>1. Выбираете вещи в корзину.</p>
-                <p>2. Нажимаете «Оформить».</p>
-                <p>3. Я пишу вам вечером.</p>
-                <p>4. Оплата СБП или Авито.</p>
-                <p>5. Отправка СДЭК.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
-        <div class="modal-content">
-            <button class="modal-close" onclick="closeModal()">✕</button>
-            <div class="slider-container">
-                <button class="slider-arrow left" onclick="moveSlider(-1)">❮</button>
-                <div class="slider" id="modal-slider"></div>
-                <button class="slider-arrow right" onclick="moveSlider(1)">❯</button>
-            </div>
-            <div class="thumbnails-container" id="modal-thumbnails"></div>
-            <div style="padding: 20px;">
-                <div id="modal-article" style="font-size: 11px; color: var(--muted); margin-bottom:5px;"></div>
-                <h2 id="modal-title" style="font-size: 22px; font-weight: 900; margin-top:0; color: #fff;"></h2>
-                <div style="display:flex; gap:10px; margin-bottom:20px; align-items: center;">
-                    <div id="modal-price" style="font-size: 24px; font-weight: 900; color: var(--price);"></div>
-                    <div id="modal-old-price" style="font-size: 14px; text-decoration: line-through; color: var(--muted);"></div>
-                    <div id="modal-condition" style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); color: #fff;"></div>
+        <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeModal()">✕</button>
+                <div class="slider-container">
+                    <button class="slider-arrow left" onclick="moveSlider(-1)">❮</button>
+                    <div class="slider" id="modal-slider"></div>
+                    <button class="slider-arrow right" onclick="moveSlider(1)">❯</button>
                 </div>
-                <div id="modal-sizes" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;"></div>
-                <div id="modal-desc" style="font-size: 14px; line-height: 1.5; color: var(--muted); margin-bottom: 20px; white-space: pre-wrap;"></div>
-                <button class="buy-btn" id="modal-buy" onclick="addToCartFromModal(event)" style="padding: 15px; font-size: 16px;">В корзину</button>
+                <div class="thumbnails-container" id="modal-thumbnails"></div>
+                <div style="padding: 20px;">
+                    <div id="modal-article" style="font-size: 11px; color: var(--muted); margin-bottom:5px;"></div>
+                    <h2 id="modal-title" style="font-size: 22px; font-weight: 900; margin-top:0; color: #fff;"></h2>
+                    <div style="display:flex; gap:10px; margin-bottom:20px; align-items: center;">
+                        <div id="modal-price" style="font-size: 24px; font-weight: 900; color: var(--price);"></div>
+                        <div id="modal-old-price" style="font-size: 14px; text-decoration: line-through; color: var(--muted);"></div>
+                        <div id="modal-condition" style="font-size: 12px; background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); color: #fff;"></div>
+                    </div>
+                    <div id="modal-sizes" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;"></div>
+                    <div id="modal-desc" style="font-size: 14px; line-height: 1.5; color: var(--muted); margin-bottom: 20px; white-space: pre-wrap;"></div>
+                    <button class="buy-btn" id="modal-buy" onclick="addToCartFromModal(event)" style="padding: 15px; font-size: 16px;">В корзину</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="cart-modal" id="cartModal" onclick="if(event.target===this) closeCart()">
-        <div class="cart-content">
-            <button class="modal-close" onclick="closeCart()">✕</button>
-            <h2 style="margin-top:0; color:#fff;">Корзина</h2>
-            <div id="cart-items-wrap"></div>
-            <div class="cart-total" id="cart-total">Итого: 0 ₽</div>
-            <input type="text" id="promo-input" class="promo-input" placeholder="Промокод">
-            <button class="buy-btn" id="checkout-btn" onclick="checkout(event)" style="padding: 15px;">Оформить заказ</button>
+        <div class="cart-modal" id="cartModal" onclick="if(event.target===this) closeCart()">
+            <div class="cart-content">
+                <button class="modal-close" onclick="closeCart()">✕</button>
+                <h2 style="margin-top:0; color:#fff;">Корзина</h2>
+                <div id="cart-items-wrap"></div>
+                <div class="cart-total" id="cart-total">Итого: 0 ₽</div>
+                <input type="text" id="promo-input" class="promo-input" placeholder="Промокод">
+                <button class="buy-btn" id="checkout-btn" onclick="checkout(event)" style="padding: 15px;">Оформить заказ</button>
+            </div>
         </div>
-    </div>
 
-    <div class="cart-modal" id="ordersModal" onclick="if(event.target===this) closeOrders()">
-        <div class="cart-content">
-            <button class="modal-close" onclick="closeOrders()">✕</button>
-            <h2 style="margin-top:0; color:#fff;">Мои заказы</h2>
-            <div id="orders-list"></div>
+        <div class="cart-modal" id="ordersModal" onclick="if(event.target===this) closeOrders()">
+            <div class="cart-content">
+                <button class="modal-close" onclick="closeOrders()">✕</button>
+                <h2 style="margin-top:0; color:#fff;">Мои заказы</h2>
+                <div id="orders-list"></div>
+            </div>
         </div>
-    </div>
 
-    <div class="support-fab" onclick="askQuestion()">💬</div>
-    
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="https://t.me/radzhiv_shop">📢 ТГ-канал</a>
-            <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
-            <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
-        </div>
-        <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP</p>
-    </footer>
+        <div class="support-fab" onclick="askQuestion()">💬</div>
+        
+        <footer class="footer">
+            <div class="footer-links">
+                <a href="https://t.me/radzhiv_shop">📢 ТГ-канал</a>
+                <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
+                <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
+            </div>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP</p>
+        </footer>
+    </div>
 
     <script>
+        const tg = window.Telegram?.WebApp;
+        
+        // ПРОВЕРКА: Открыто ли через Telegram
+        if (!tg || !tg.initData) {
+            document.getElementById('tg-blocker').style.display = 'flex';
+        } else {
+            document.getElementById('main-content').style.display = 'flex';
+            tg.expand(); 
+            tg.setHeaderColor('#09090b');
+        }
+
         function createRipple(event) {
             const button = event.currentTarget;
             const circle = document.createElement("span");
@@ -375,8 +413,6 @@
             button.appendChild(circle);
         }
 
-        const tg = window.Telegram?.WebApp;
-        if (tg) { tg.expand(); tg.setHeaderColor('#09090b'); }
         const products = [{"id": 1, "article": "RAD-432525328", "name": "МУЖСКАЯ ЧЁРНАЯ ХУДИ", "price": "450", "old_price": "", "category": "Кофты", "condition": "Хорошее", "status": "instock", "desc": "Товар Б/У\nЦвет: Чёрный\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "sizes": ["S"], "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg"]}, {"id": 2, "article": "RAD-432525326", "name": "ПЛОТНАЯ МУСКАЯ ФУТБОЛКА", "price": "500", "old_price": "", "category": "Футболки", "condition": "", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.\nЦвет: Чёрный", "sizes": [], "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg"]}, {"id": 3, "article": "RAD-0432525325", "name": "УДЛИНЕННАЯ ВЕТРОВКА O'STIN", "price": "700", "old_price": "", "category": "Кофты", "condition": "Хорошее", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nЦвет: Синий\nСезон: Демисезон\nМатериал: Полиэстер\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "sizes": ["S"], "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg"]}, {"id": 4, "article": "RAD-432525327", "name": "ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ", "price": "700", "old_price": "", "category": "Шорты", "condition": "Новое (без упаковки и бирок)", "status": "instock", "desc": "Новые, только примерялись. \n\nЦвет: Чёрный\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "sizes": ["S"], "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg", "img/4_img_2.jpg", "img/4_img_3.jpg", "img/4_img_4.jpg"]}];
         
         let currentProduct = null, currentCategory = 'Все', selectedSize = "", showFavoritesOnly = false;
@@ -651,12 +687,12 @@
         }
         function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
-                function checkout(event) {
+        function checkout(event) {
             if(event) createRipple(event);
             if (cart.length === 0) return;
             const btn = document.getElementById('checkout-btn'); 
             
-            if (btn.disabled) return; // Защита от дабл-клика
+            if (btn.disabled) return; 
             btn.disabled = true; 
             btn.innerText = "Отправка...";
 
@@ -675,31 +711,22 @@
                         tg.close(); 
                         cart = []; 
                         localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
-                        updateCartBadge(); 
-                        updateView(); // ОБНОВЛЯЕТ КАРТОЧКИ ТОВАРОВ
-                        closeCart();
-                        btn.disabled = false; 
-                        btn.innerText = "Оформить заказ"; 
+                        updateCartBadge(); updateView(); closeCart();
+                        btn.disabled = false; btn.innerText = "Оформить заказ"; 
                     }, 300); 
                 } catch (e) {
-                    alert("Ошибка отправки в Телеграм.");
-                    btn.disabled = false;
-                    btn.innerText = "Оформить заказ";
+                    alert("Ошибка отправки.");
+                    btn.disabled = false; btn.innerText = "Оформить заказ";
                 }
-            } else { 
-                cart = []; 
-                localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); 
-                updateCartBadge(); 
-                updateView(); // ОБНОВЛЯЕТ КАРТОЧКИ ТОВАРОВ
-                closeCart(); 
-                btn.disabled = false;
-                btn.innerText = "Оформить заказ";
-                alert("✅ Заказ сформирован локально! (В браузере данные в Телеграм не уходят)"); 
             }
         }
+
         function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
 
-        setTimeout(() => { resetView(); updateCartBadge(); }, 300);
+        // Инициализация только если мы в Телеграме
+        if (tg && tg.initData) {
+            setTimeout(() => { resetView(); updateCartBadge(); }, 300);
+        }
     </script>
 </body>
 </html>
