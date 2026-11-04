@@ -619,12 +619,35 @@
                 });
             }
 
-            const buyBtn = document.getElementById('modal-buy');
-            if (p.status === 'sold') { buyBtn.innerText = 'Нет в наличии'; buyBtn.className = 'buy-btn disabled'; buyBtn.disabled = true; }
-            else { let inCart = cart.some(c => c.id === p.id); buyBtn.innerText = inCart ? 'В корзине' : 'В корзину'; buyBtn.className = inCart ? 'buy-btn added' : 'buy-btn'; buyBtn.disabled = false; }
-            
-            document.getElementById('productModal').classList.add('show');
-        }
+                       const buyBtn = document.getElementById('modal-buy');
+            if (p.status === 'sold') { 
+                buyBtn.innerText = 'Нет в наличии'; 
+                buyBtn.className = 'buy-btn disabled'; 
+                buyBtn.disabled = true; 
+            } else { 
+                let inCart = cart.some(c => c.id === p.id); 
+                if (inCart) {
+                    buyBtn.innerText = 'В корзине (Удалить)'; 
+                    buyBtn.className = 'buy-btn added'; 
+                } else {
+                    buyBtn.innerText = 'В корзину'; 
+                    buyBtn.className = 'buy-btn'; 
+                }
+                buyBtn.disabled = false; 
+            }
+                        buyBtn.onclick = () => {
+                let inCart = cart.some(c => c.id === p.id);
+                if (inCart) {
+                    cart = cart.filter(c => c.id !== p.id);
+                    localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
+                    updateCartBadge();
+                    updateCardButton(p.id, false);
+                    buyBtn.innerText = 'В корзину';
+                    buyBtn.className = 'buy-btn';
+                } else {
+                    addToCartFromModal(event);
+                }
+            };
 
         function closeModal() { document.getElementById('productModal').classList.remove('show'); currentProduct = null; }
 
