@@ -199,7 +199,6 @@
 
         <div class="container"><div class="grid" id="product-grid"></div></div>
 
-        <!-- МОДАЛКА ФИЛЬТРОВ -->
         <div class="modal" id="filterModal" onclick="if(event.target===this) closeFilters()">
             <div class="modal-content" style="max-width: 400px; padding: 25px;">
                 <button class="modal-close" onclick="closeFilters()">✕</button>
@@ -224,11 +223,10 @@
                     </div>
                 </div>
                 <button class="buy-btn" onclick="closeFilters()">Применить</button>
-                <button class="reset-btn" onclick="resetFilters()">Сбросить фильтры</button>
+                <button class="reset-btn" onclick="resetFilters()" style="background:#3f3f46; margin-top:10px; box-shadow:none;">Сбросить фильтры</button>
             </div>
         </div>
 
-        <!-- МОДАЛКА КАК ЗАКАЗАТЬ -->
         <div class="modal" id="howItWorksModal" onclick="if(event.target===this) closeHowItWorks()">
             <div class="modal-content" style="max-width: 450px; padding: 25px;">
                 <button class="modal-close" onclick="closeHowItWorks()">✕</button>
@@ -243,7 +241,6 @@
             </div>
         </div>
 
-        <!-- МОДАЛКА ТОВАРА -->
         <div class="modal" id="productModal" onclick="if(event.target===this) closeModal()">
             <div class="modal-content">
                 <button class="modal-close" onclick="closeModal()">✕</button>
@@ -264,11 +261,11 @@
                     <div id="modal-sizes" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;"></div>
                     <div id="modal-desc" style="font-size: 14px; line-height: 1.5; color: var(--muted); margin-bottom: 20px; white-space: pre-wrap;"></div>
                     <button class="buy-btn" id="modal-buy" onclick="addToCartFromModal(event)" style="padding: 15px; font-size: 16px;">В корзину</button>
+                    <button class="buy-btn" id="modal-go-to-cart" onclick="openCart(); closeModal();" style="display:none; margin-top:10px; padding: 15px; font-size: 16px; background: #10b981;">Перейти в корзину</button>
                 </div>
             </div>
         </div>
 
-        <!-- ШАГ 1: КОРЗИНА -->
         <div class="cart-modal" id="cartModal" onclick="if(event.target===this) closeCart()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeCart()">✕</button>
@@ -280,7 +277,6 @@
             </div>
         </div>
 
-        <!-- ШАГ 2: ФОРМА ДАННЫХ -->
         <div class="cart-modal" id="formModal" onclick="if(event.target===this) closeForm()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeForm()">✕</button>
@@ -305,7 +301,6 @@
             </div>
         </div>
 
-        <!-- ШАГ 3: ПОДТВЕРЖДЕНИЕ -->
         <div class="cart-modal" id="confirmModal" onclick="if(event.target===this) closeConfirm()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeConfirm()">✕</button>
@@ -324,13 +319,12 @@
                 <div class="cart-total" id="confirm-total" style="margin-bottom:20px;">Итого: 0 ₽</div>
                 
                 <div style="display:flex; gap:10px;">
-                    <button class="reset-btn" onclick="editForm()" style="background:#3f3f46; box-shadow:none; margin-top:0;">✏️ Изменить</button>
-                    <button class="buy-btn" id="final-checkout-btn" onclick="finalCheckout(event)" style="padding: 15px; margin-top:0;">✅ Всё верно</button>
+                    <button class="reset-btn" onclick="editForm()" style="background:#3f3f46; box-shadow:none; margin-top:0; flex:1; padding:15px; border-radius:10px; color:white; font-weight:bold; border:none; cursor:pointer;">✏️ Изменить</button>
+                    <button class="buy-btn" id="final-checkout-btn" onclick="finalCheckout(event)" style="padding: 15px; margin-top:0; flex:1;">✅ Всё верно</button>
                 </div>
             </div>
         </div>
 
-        <!-- МОИ ЗАКАЗЫ -->
         <div class="cart-modal" id="ordersModal" onclick="if(event.target===this) closeOrders()">
             <div class="cart-content">
                 <button class="modal-close" onclick="closeOrders()">✕</button>
@@ -410,14 +404,7 @@
         let orders = JSON.parse(localStorage.getItem('radzhiv_orders')) || [];
         let currentSlideIndex = 0;
 
-        // Данные для оформления
-        let checkoutData = {
-            name: '',
-            phone: '',
-            city: '',
-            delivery: 'СДЭК',
-            address: ''
-        };
+        let checkoutData = { name: '', phone: '', city: '', delivery: 'СДЭК', address: '' };
 
         const grid = document.getElementById('product-grid');
         const pageTitle = document.getElementById('page-title');
@@ -449,11 +436,15 @@
             const container = document.getElementById('filter-cats-container'); container.innerHTML = '';
             cats.forEach(c => {
                 const btn = document.createElement('button'); btn.className = `filter-btn ${c === currentCategory ? 'active' : ''}`; btn.innerText = c;
+                btn.style.cssText = 'padding:6px 12px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:white; cursor:pointer;';
+                if(c === currentCategory) btn.style.background = 'var(--accent)';
                 btn.onclick = () => { currentCategory = c; initFilters(); updateView(); }; container.appendChild(btn);
             });
             const sizeContainer = document.getElementById('filter-sizes-container'); sizeContainer.innerHTML = '';
             allSizes.forEach(s => {
                 const btn = document.createElement('button'); btn.className = `filter-btn ${activeSizes.includes(s) ? 'active' : ''}`; btn.innerText = s;
+                btn.style.cssText = 'padding:6px 12px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:white; cursor:pointer;';
+                if(activeSizes.includes(s)) btn.style.background = 'var(--accent)';
                 btn.onclick = () => {
                     if (activeSizes.includes(s)) activeSizes = activeSizes.filter(item => item !== s);
                     else activeSizes.push(s);
@@ -463,6 +454,8 @@
             const condContainer = document.getElementById('filter-conditions-container'); condContainer.innerHTML = '';
             allConditions.forEach(c => {
                 const btn = document.createElement('button'); btn.className = `filter-btn ${activeConditions.includes(c) ? 'active' : ''}`; btn.innerText = c;
+                btn.style.cssText = 'padding:6px 12px; border-radius:8px; border:1px solid #3f3f46; background:#27272a; color:white; cursor:pointer;';
+                if(activeConditions.includes(c)) btn.style.background = 'var(--accent)';
                 btn.onclick = () => {
                     if (activeConditions.includes(c)) activeConditions = activeConditions.filter(item => item !== c);
                     else activeConditions.push(c);
@@ -603,10 +596,11 @@
             document.getElementById('modal-condition').innerText = p.condition || 'Не указано';
             document.getElementById('modal-desc').innerText = p.desc || 'Описание отсутствует.';
             
-            const sizesWrap = document.getElementById('modal-sizes'); sizesWrap.innerHTML = '';
-            if (p.sizes && p.sizes.length > 1) {
+            const sizesWrap = document.getElementById('modal-sizes'); sizesWrap.innerHTML = ''; sizesWrap.style.display = 'flex';
+            if (p.sizes && p.sizes.length > 0) {
                 p.sizes.forEach(s => {
                     const btn = document.createElement('button'); btn.className = 'size-btn'; btn.innerText = s;
+                    if (p.sizes.length === 1) { btn.classList.add('active'); selectedSize = s; }
                     btn.onclick = () => { 
                         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active')); 
                         btn.classList.add('active'); 
@@ -614,23 +608,24 @@
                     };
                     sizesWrap.appendChild(btn);
                 });
-            } else if (p.sizes && p.sizes.length === 1) {
-                selectedSize = p.sizes[0]; 
-                sizesWrap.style.display = 'none';
             } else {
                 sizesWrap.style.display = 'none';
             }
 
             const buyBtn = document.getElementById('modal-buy');
+            const goToCartBtn = document.getElementById('modal-go-to-cart');
+
             if (p.status === 'sold') { 
                 buyBtn.innerText = 'Нет в наличии'; 
                 buyBtn.className = 'buy-btn disabled'; 
                 buyBtn.disabled = true; 
+                goToCartBtn.style.display = 'none';
             } else { 
                 let inCart = cart.some(c => c.id === p.id); 
-                buyBtn.innerText = inCart ? 'В корзине (Удалить)' : 'В корзину'; 
+                buyBtn.innerText = inCart ? 'Удалить из корзины' : 'В корзину'; 
                 buyBtn.className = inCart ? 'buy-btn added' : 'buy-btn'; 
                 buyBtn.disabled = false; 
+                goToCartBtn.style.display = inCart ? 'block' : 'none';
             }
 
             buyBtn.onclick = (e) => {
@@ -643,11 +638,17 @@
                     updateCardButton(p.id, false);
                     buyBtn.innerText = 'В корзину';
                     buyBtn.className = 'buy-btn';
+                    goToCartBtn.style.display = 'none';
                 } else {
+                    let finalSize = selectedSize;
+                    if (p.sizes && p.sizes.length === 1) finalSize = p.sizes[0];
+                    if (!finalSize) finalSize = "Без размера";
+                    
                     if (p.sizes && p.sizes.length > 1 && !selectedSize) { showToast("Выберите размер!"); return; }
-                    pushToCart(p, selectedSize || "Без размера");
-                    buyBtn.innerText = 'В корзине (Удалить)';
+                    pushToCart(p, finalSize);
+                    buyBtn.innerText = 'Удалить из корзины';
                     buyBtn.className = 'buy-btn added';
+                    goToCartBtn.style.display = 'block';
                 }
             };
             
@@ -677,9 +678,6 @@
             localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); updateCartBadge(); updateCardButton(p.id, true);
         }
 
-        // ==========================================
-        // ЛОГИКА КОРЗИНЫ И ОФОРМЛЕНИЯ
-        // ==========================================
         function openCart() {
             const wrap = document.getElementById('cart-items-wrap'); wrap.innerHTML = ''; let total = 0;
             cart.forEach((item, idx) => {
@@ -706,18 +704,15 @@
             }, 300);
         }
 
-        // Шаг 2: Форма данных
         function openForm() {
             if (cart.length === 0) return;
             closeCart();
             
-            // Восстанавливаем данные, если уже вводили
             document.getElementById('chk-name').value = checkoutData.name;
             document.getElementById('chk-phone').value = checkoutData.phone;
             document.getElementById('chk-city').value = checkoutData.city;
             document.getElementById('chk-address').value = checkoutData.address;
             
-            // Восстанавливаем кнопку доставки
             document.querySelectorAll('.del-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.innerText === checkoutData.delivery) btn.classList.add('active');
@@ -728,7 +723,7 @@
 
         function closeForm() {
             document.getElementById('formModal').classList.remove('show');
-            openCart(); // Возвращаемся в корзину
+            openCart(); 
         }
 
         function selectDelivery(name, btn) {
@@ -756,7 +751,6 @@
             input.value = res;
         }
 
-        // Шаг 3: Подтверждение
         function validateAndConfirm() {
             const name = document.getElementById('chk-name').value.trim();
             const phone = document.getElementById('chk-phone').value.trim();
@@ -772,7 +766,6 @@
             checkoutData.city = city;
             checkoutData.address = address;
 
-            // Заполняем окно подтверждения
             document.getElementById('conf-name').innerText = checkoutData.name;
             document.getElementById('conf-phone').innerText = checkoutData.phone;
             document.getElementById('conf-city').innerText = checkoutData.city;
@@ -794,7 +787,7 @@
 
         function editForm() {
             document.getElementById('confirmModal').classList.remove('show');
-            openForm(); // Возвращаемся в форму с сохраненными данными
+            openForm();
         }
 
         function closeConfirm() {
@@ -804,6 +797,12 @@
 
         function finalCheckout(event) {
             if(event) createRipple(event);
+            
+            if (!checkoutData.name || !checkoutData.phone || !checkoutData.city) {
+                showToast("Заполните данные для доставки!");
+                return;
+            }
+
             const btn = document.getElementById('final-checkout-btn');
             if (btn.disabled) return;
             btn.disabled = true; btn.innerText = "Отправка...";
@@ -814,7 +813,6 @@
             orders.push({ date: new Date().toLocaleDateString(), items: [...cart], total: total, status: "Ожидает" });
             localStorage.setItem('radzhiv_orders', JSON.stringify(orders));
 
-            // Собираем финальный пейлоад
             let payload = { 
                 action: "checkout", 
                 items: cart, 
@@ -857,7 +855,7 @@
         }
         function closeOrders() { document.getElementById('ordersModal').classList.remove('show'); }
 
-        function askQuestion() { if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
+        function askQuestion() { const tg = window.Telegram?.WebApp; if(tg) tg.openTelegramLink("https://t.me/radzhiv_shop_support_bot"); else window.location.href = "https://t.me/radzhiv_shop_support_bot"; }
     </script>
 </body>
 </html>
