@@ -424,7 +424,7 @@
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.3 · 11.11</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.4 · 11.11</p>
         </footer>
     </div>
 
@@ -919,6 +919,14 @@
                 return;
             }
 
+            // защита от спама: один заказ в 2 минуты
+            const lastTs = parseInt(localStorage.getItem('radzhiv_last_order') || '0', 10);
+            if (lastTs && (Date.now() - lastTs) < 120000) {
+                const left = Math.ceil((120000 - (Date.now() - lastTs)) / 1000);
+                showToast(`Заказ уже отправлен. Подождите ${left} сек.`);
+                return;
+            }
+
             const btn = document.getElementById('final-checkout-btn');
             if (btn.disabled) return;
             btn.disabled = true; btn.innerText = "Отправка...";
@@ -941,6 +949,7 @@
             if (tg && tg.sendData) { 
                 try {
                     tg.sendData(JSON.stringify(payload)); 
+                    localStorage.setItem('radzhiv_last_order', String(Date.now()));
                     setTimeout(() => { 
                         cart = []; 
                         localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
