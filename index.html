@@ -188,6 +188,10 @@
         body.theme-forest .orb-1 { background: #10b981; } body.theme-forest .orb-2 { background: #2f7f5f; }
         body.theme-forest .buy-btn { background: linear-gradient(145deg, #10b981, #0b8a61); box-shadow: 0 4px 15px rgba(16,185,129,0.28); }
         body.theme-forest .buy-btn:hover { background: linear-gradient(145deg, #0b8a61, #076a4a); }
+
+        /* кнопка «В корзине» всегда зелёная, независимо от темы */
+        body .buy-btn.added { background: linear-gradient(145deg, #10b981, #059669) !important; border-color: #10b981 !important; box-shadow: 0 4px 15px rgba(16,185,129,0.35) !important; color: #fff !important; }
+        body .buy-btn.added::after { content: " ✓"; }
     </style>
 </head>
 <body>
@@ -209,7 +213,7 @@
             <div class="search-wrapper"><input type="text" id="search" class="search-box" placeholder="Искать..." oninput="updateView()"></div>
             <div class="header-actions">
                 <span class="icon-btn" onclick="cycleTheme()" id="theme-btn" title="Сменить фон">🎨</span>
-                <span class="icon-btn" onclick="openOrders()">📦</span>
+                <span class="icon-btn" onclick="openOrders()">📦<span class="cart-badge" id="orders-badge" style="display:none;">0</span></span>
                 <span class="icon-btn" onclick="toggleFavView()" id="fav-icon">❤️</span>
                 <span class="icon-btn" onclick="openCart()">🛒<span class="cart-badge" id="cart-badge">0</span></span>
             </div>
@@ -310,7 +314,59 @@
                 
                 <input type="text" id="chk-name" class="chk-input" placeholder="ФИО (как в паспорте)">
                 <input type="tel" id="chk-phone" class="chk-input" placeholder="+7 (___) ___-__-__" oninput="maskPhone(this)">
-                <input type="text" id="chk-city" class="chk-input" placeholder="Город">
+                <input type="text" id="chk-city" class="chk-input" placeholder="Начните вводить город..." list="cities-list" autocomplete="off">
+                <datalist id="cities-list">
+                    <option value="Москва"></option><option value="Санкт-Петербург"></option><option value="Новосибирск"></option>
+                    <option value="Екатеринбург"></option><option value="Казань"></option><option value="Нижний Новгород"></option>
+                    <option value="Челябинск"></option><option value="Самара"></option><option value="Омск"></option>
+                    <option value="Ростов-на-Дону"></option><option value="Уфа"></option><option value="Красноярск"></option>
+                    <option value="Воронеж"></option><option value="Пермь"></option><option value="Волгоград"></option>
+                    <option value="Краснодар"></option><option value="Саратов"></option><option value="Тюмень"></option>
+                    <option value="Тольятти"></option><option value="Ижевск"></option><option value="Барнаул"></option>
+                    <option value="Ульяновск"></option><option value="Иркутск"></option><option value="Хабаровск"></option>
+                    <option value="Ярославль"></option><option value="Владивосток"></option><option value="Махачкала"></option>
+                    <option value="Томск"></option><option value="Оренбург"></option><option value="Кемерово"></option>
+                    <option value="Новокузнецк"></option><option value="Рязань"></option><option value="Астрахань"></option>
+                    <option value="Набережные Челны"></option><option value="Пенза"></option><option value="Липецк"></option>
+                    <option value="Киров"></option><option value="Чебоксары"></option><option value="Тула"></option>
+                    <option value="Калининград"></option><option value="Балашиха"></option><option value="Курск"></option>
+                    <option value="Севастополь"></option><option value="Сочи"></option><option value="Ставрополь"></option>
+                    <option value="Улан-Удэ"></option><option value="Тверь"></option><option value="Магнитогорск"></option>
+                    <option value="Иваново"></option><option value="Брянск"></option><option value="Симферополь"></option>
+                    <option value="Белгород"></option><option value="Сургут"></option><option value="Владимир"></option>
+                    <option value="Нижний Тагил"></option><option value="Архангельск"></option><option value="Чита"></option>
+                    <option value="Калуга"></option><option value="Смоленск"></option><option value="Волжский"></option>
+                    <option value="Курган"></option><option value="Череповец"></option><option value="Орёл"></option>
+                    <option value="Саранск"></option><option value="Владикавказ"></option><option value="Мурманск"></option>
+                    <option value="Якутск"></option><option value="Тамбов"></option><option value="Стерлитамак"></option>
+                    <option value="Грозный"></option><option value="Кострома"></option><option value="Петрозаводск"></option>
+                    <option value="Нижневартовск"></option><option value="Новороссийск"></option><option value="Йошкар-Ола"></option>
+                    <option value="Химки"></option><option value="Таганрог"></option><option value="Комсомольск-на-Амуре"></option>
+                    <option value="Сыктывкар"></option><option value="Нальчик"></option><option value="Шахты"></option>
+                    <option value="Дзержинск"></option><option value="Орск"></option><option value="Братск"></option>
+                    <option value="Ангарск"></option><option value="Благовещенск"></option><option value="Энгельс"></option>
+                    <option value="Королёв"></option><option value="Великий Новгород"></option><option value="Старый Оскол"></option>
+                    <option value="Псков"></option><option value="Мытищи"></option><option value="Люберцы"></option>
+                    <option value="Южно-Сахалинск"></option><option value="Армавир"></option><option value="Рыбинск"></option>
+                    <option value="Бийск"></option><option value="Северодвинск"></option><option value="Вологда"></option>
+                    <option value="Подольск"></option><option value="Сызрань"></option><option value="Берёзники"></option>
+                    <option value="Красногорск"></option><option value="Норильск"></option><option value="Новомосковск"></option>
+                    <option value="Каменск-Уральский"></option><option value="Златоуст"></option><option value="Нефтекамск"></option>
+                    <option value="Абакан"></option><option value="Новый Уренгой"></option><option value="Ногинск"></option>
+                    <option value="Кисловодск"></option><option value="Пятигорск"></option><option value="Домодедово"></option>
+                    <option value="Первоуральск"></option><option value="Обнинск"></option><option value="Серпухов"></option>
+                    <option value="Щёлково"></option><option value="Ковров"></option><option value="Апатиты"></option>
+                    <option value="Керчь"></option><option value="Майкоп"></option><option value="Евпатория"></option>
+                    <option value="Дербент"></option><option value="Хасавюрт"></option><option value="Черкесск"></option>
+                    <option value="Муром"></option><option value="Новочебоксарск"></option><option value="Тобольск"></option>
+                    <option value="Ачинск"></option><option value="Канск"></option><option value="Новочеркасск"></option>
+                    <option value="Салават"></option><option value="Нефтеюганск"></option><option value="Ноябрьск"></option>
+                    <option value="Димитровград"></option><option value="Батайск"></option><option value="Новошахтинск"></option>
+                    <option value="Балаково"></option><option value="Жуковский"></option><option value="Раменское"></option>
+                    <option value="Реутов"></option><option value="Одинцово"></option><option value="Краснознаменск"></option>
+                    <option value="Пушкино"></option><option value="Ивантеевка"></option><option value="Электросталь"></option>
+                    <option value="Новомосковск"></option><option value="Волгодонск"></option><option value="Камышин"></option>
+                </datalist>
                 
                 <h4 style="margin: 0 0 10px 0; color:var(--muted); font-size: 13px;">Служба доставки</h4>
                 <div class="delivery-grid">
@@ -318,6 +374,7 @@
                     <div class="del-btn" onclick="selectDelivery('5Post', this)">5Post</div>
                     <div class="del-btn" onclick="selectDelivery('Boxberry', this)">Boxberry</div>
                     <div class="del-btn" onclick="selectDelivery('Яндекс', this)">Яндекс</div>
+                <div class="del-btn" onclick="selectDelivery('Ozon', this)">Ozon</div>
                     <div class="del-btn" onclick="selectDelivery('Авито', this)" style="grid-column: span 2;">Авито-доставка</div>
                 </div>
 
@@ -394,6 +451,7 @@
             const idx = SITE_THEMES.indexOf(cur);
             applySiteTheme(SITE_THEMES[(idx + 1) % SITE_THEMES.length]);
         }
+        try { applySiteTheme(localStorage.getItem('radzhiv_theme') || 'night'); } catch (e) {}
 
         window.addEventListener('load', function() {
             let attempts = 0;
@@ -411,6 +469,7 @@
                     applySiteTheme(localStorage.getItem('radzhiv_theme') || 'night');
                     resetView();
                     updateCartBadge();
+                    updateOrdersBadge();
                 } else if (attempts >= maxAttempts) {
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'flex';
@@ -435,7 +494,7 @@
             button.appendChild(circle);
         }
 
-        const products = [{"id": 1, "article": "RAD-432525328", "name": "МУЖСКАЯ ЧЁРНАЯ ХУДИ", "price": "450", "old_price": "", "category": "Кофты", "condition": "Б/У", "status": "instock", "desc": "Товар Б/У\nЦвет: Чёрный\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "sizes": ["S"], "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg"]}, {"id": 2, "article": "RAD-432525326", "name": "ПЛОТНАЯ МУСКАЯ ФУТБОЛКА", "price": "500", "old_price": "", "category": "Футболки", "condition": "Почти новое", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.\nЦвет: Чёрный", "sizes": [], "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg"]}, {"id": 3, "article": "RAD-0432525325", "name": "УДЛИНЕННАЯ ВЕТРОВКА O'STIN", "price": "700", "old_price": "", "category": "Куртки", "condition": "Б/У", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nЦвет: Синий\nСезон: Демисезон\nМатериал: Полиэстер\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "sizes": ["S"], "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg"]}, {"id": 4, "article": "RAD-432525327", "name": "ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ", "price": "700", "old_price": "", "category": "Шорты", "condition": "Почти новое", "status": "instock", "desc": "Новые, только примерялись. \n\nЦвет: Чёрный\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "sizes": ["S"], "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg", "img/4_img_2.jpg", "img/4_img_3.jpg", "img/4_img_4.jpg"]}];
+        const products = [{"id": 1, "article": "RAD-432525328", "name": "МУЖСКАЯ ЧЁРНАЯ ХУДИ", "price": "450", "old_price": "", "category": "Кофты", "condition": "Б/У", "status": "instock", "desc": "Товар Б/У\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "color": "Чёрный", "sizes": ["S"], "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg"]}, {"id": 2, "article": "RAD-432525326", "name": "ПЛОТНАЯ МУСКАЯ ФУТБОЛКА", "price": "500", "old_price": "", "category": "Футболки", "condition": "Почти новое", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.", "color": "Чёрный", "sizes": [], "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg"]}, {"id": 3, "article": "RAD-0432525325", "name": "УДЛИНЕННАЯ ВЕТРОВКА O'STIN", "price": "700", "old_price": "", "category": "Куртки", "condition": "Б/У", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nСезон: Демисезон\nМатериал: Полиэстер\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "color": "Синий", "sizes": ["S"], "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg"]}, {"id": 4, "article": "RAD-432525327", "name": "ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ", "price": "700", "old_price": "", "category": "Шорты", "condition": "Почти новое", "status": "instock", "desc": "Новые, только примерялись. \n\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "color": "Чёрный", "sizes": ["S"], "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg", "img/4_img_2.jpg", "img/4_img_3.jpg", "img/4_img_4.jpg"]}];
         
         let currentProduct = null, currentCategory = 'Все', selectedSize = "", showFavoritesOnly = false;
         let activeSizes = [], activeConditions = [];
@@ -636,7 +695,7 @@
             document.getElementById('modal-title').innerText = p.name;
             document.getElementById('modal-price').innerText = p.price;
             document.getElementById('modal-old-price').innerText = (p.old_price && p.old_price !== '') ? p.old_price : '';
-            document.getElementById('modal-condition').innerText = p.condition || 'Не указано';
+            document.getElementById('modal-condition').innerText = [p.condition, p.color].filter(Boolean).join(' · ') || 'Не указано';
             document.getElementById('modal-desc').innerText = p.desc || 'Описание отсутствует.';
             
             const sizesWrap = document.getElementById('modal-sizes'); sizesWrap.innerHTML = ''; sizesWrap.style.display = 'flex';
@@ -883,18 +942,53 @@
                 try {
                     tg.sendData(JSON.stringify(payload)); 
                     setTimeout(() => { 
-                        tg.close(); 
                         cart = []; 
                         localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
-                        updateCartBadge(); updateView(); 
+                        updateCartBadge(); updateOrdersBadge(); updateView(); 
                         document.getElementById('confirmModal').classList.remove('show');
                         btn.disabled = false; btn.innerText = "✅ Всё верно";
+                        showOrderSuccess();
                     }, 300); 
                 } catch (e) {
                     showToast("Ошибка отправки.");
                     btn.disabled = false; btn.innerText = "✅ Всё верно";
                 }
+            } else {
+                showToast("Откройте магазин через Telegram");
+                btn.disabled = false; btn.innerText = "✅ Всё верно";
             }
+        }
+
+        function tgClose() { const tg = window.Telegram?.WebApp; if (tg && tg.close) tg.close(); }
+
+        function updateOrdersBadge() {
+            const b = document.getElementById('orders-badge');
+            if (!b) return;
+            b.innerText = orders.length;
+            b.style.display = orders.length > 0 ? 'block' : 'none';
+        }
+
+        function showOrderSuccess() {
+            const old = document.getElementById('successModal');
+            if (old) old.remove();
+            const ov = document.createElement('div');
+            ov.className = 'cart-modal show';
+            ov.id = 'successModal';
+            ov.innerHTML = `
+                <div class="cart-content" style="text-align:center;">
+                    <div style="font-size:60px;margin:4px 0 8px 0;">✅</div>
+                    <h2 style="margin-top:0;">Заявка отправлена!</h2>
+                    <p style="color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 18px 0;">
+                        Мы получили ваш заказ и свяжемся с вами в рабочее время (9:00–22:00 МСК),
+                        чтобы подтвердить наличие и рассчитать доставку.
+                    </p>
+                    <div style="background:rgba(16,185,129,0.10);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:12px;margin-bottom:18px;font-size:13px;color:var(--text);">
+                        Заказ сохранён — его можно посмотреть в разделе «Мои заказы»
+                    </div>
+                    <button class="buy-btn" style="padding:14px;" onclick="document.getElementById('successModal').remove(); openOrders();">📦 Мои заказы</button>
+                    <button class="reset-btn" style="width:100%;margin-top:10px;padding:14px;border-radius:12px;border:none;background:var(--surface);color:var(--text);font-weight:700;cursor:pointer;" onclick="document.getElementById('successModal').remove(); tgClose();">Вернуться в каталог</button>
+                </div>`;
+            document.body.appendChild(ov);
         }
 
         function openOrders() {
