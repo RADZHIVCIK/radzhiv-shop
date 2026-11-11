@@ -409,6 +409,12 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
     background: linear-gradient(135deg, #ff7a3d, #ff4d6d) !important;
     box-shadow: 0 16px 34px rgba(255,77,109,.42) !important; border-radius: 16px !important;
 }
+#tg-blocker button {
+    margin-top: 14px; padding: 14px 26px; border-radius: 16px; cursor: pointer;
+    background: transparent; color: var(--text); font-weight: 600; font-size: 15px;
+    border: 1px solid var(--line); transition: .2s;
+}
+#tg-blocker button:hover { border-color: var(--accent); color: var(--accent); }
 #toast { border-radius: 16px !important; }
 
 @media (max-width: 640px) {
@@ -428,6 +434,7 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
         <h1>Доступно только в Telegram</h1>
         <p>Наш магазин работает внутри Telegram для вашей безопасности и удобства оформления заказа.</p>
         <a href="https://t.me/radzhiv_shop_bot">Открыть магазин в Telegram</a>
+        <button type="button" onclick="previewMode()">Всё равно посмотреть каталог</button>
     </div>
 
     <div id="main-content" style="display: none; flex-direction: column; min-height: 100vh;">
@@ -650,7 +657,7 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.2.70.6</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.2.70.7</p>
         </footer>
     </div>
 
@@ -681,14 +688,19 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
 
         window.addEventListener('load', function() {
             let attempts = 0;
-            const maxAttempts = 25;
+            const maxAttempts = 12;
             const tgCheck = setInterval(function() {
                 const tg = window.Telegram?.WebApp;
                 attempts++;
-                // внутри Telegram есть подписанные initData и user; в обычном
-                // браузере объект WebApp тоже существует, но пустой — по нему
-                // раньше и не срабатывала заглушка, а заказ молча терялся
-                const insideTg = !!(tg && tg.initDataUnsafe && tg.initDataUnsafe.user);
+                // Telegram однозначно определяется по подписанным initData, данным
+                // пользователя или платформе. В обычном браузере всё это пустое,
+                // поэтому там остаётся заглушка (но есть кнопка посмотреть каталог).
+                const insideTg = !!(tg && (
+                    (tg.initData && tg.initData.length > 0) ||
+                    (tg.initDataUnsafe && (tg.initDataUnsafe.user || tg.initDataUnsafe.chat || tg.initDataUnsafe.query_id)) ||
+                    (tg.platform && tg.platform !== 'unknown')
+                ));
+                window.__noTg = !insideTg;
                 if (insideTg) {
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'none';
@@ -702,7 +714,9 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
                     resetView();
                     updateCartBadge();
                     updateOrdersBadge();
-                } else if (attempts >= maxAttempts) {
+                } else if ((tg && tg.platform === 'unknown') || attempts >= maxAttempts) {
+                    // в браузере telegram-web-app.js тоже создаёт объект, но с
+                    // platform='unknown' — решаем сразу, не держим пустой экран
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'flex';
                     document.getElementById('main-content').style.display = 'none';
@@ -1193,6 +1207,11 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
                 return;
             }
 
+            if (window.__noTg) {
+                showToast("Оформление заказа доступно только в Telegram");
+                return;
+            }
+
             const btn = document.getElementById('final-checkout-btn');
             if (btn.disabled) return;
             btn.disabled = true; btn.innerText = "Отправка...";
@@ -1237,6 +1256,16 @@ body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !imp
         }
 
         function tgClose() { const tg = window.Telegram?.WebApp; if (tg && tg.close) tg.close(); }
+
+        function previewMode() {
+            // запасной выход: смотрим каталог в браузере, но заказ всё равно
+            // оформляется только из Telegram — отправлять данные некуда
+            window.__noTg = true;
+            document.getElementById('tg-blocker').style.display = 'none';
+            document.getElementById('main-content').style.display = 'flex';
+            resetView(); updateCartBadge(); updateOrdersBadge();
+            showToast("Каталог открыт в режиме просмотра. Заказ — в Telegram");
+        }
 
         function updateOrdersBadge() {
             const b = document.getElementById('orders-badge');
