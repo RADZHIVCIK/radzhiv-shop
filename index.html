@@ -703,7 +703,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v2.0.2</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v2.0.3</p>
         </footer>
     </div>
 
@@ -989,7 +989,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
                         <div class="buy-row">
                             <button class="buy-btn ${btnClass}" onclick="event.stopPropagation(); addToCart(${p.id}, event)">${btnText}</button>
                             <button class="buy-remove" title="Убрать из корзины" style="display:${inCart?'inline-flex':'none'}"
-                                    onclick="event.stopPropagation(); removeFromCart(${p.id})">✕</button>
+                                    onclick="event.stopPropagation(); dropFromCart(${p.id})">✕</button>
                         </div>
                     </div>`;
                 card.onclick = () => openModal(p); grid.appendChild(card);
@@ -1009,7 +1009,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
             }
         }
 
-        function removeFromCart(id) {
+        function dropFromCart(id) {
             cart = cart.filter(c => c.id !== id);
             localStorage.setItem('radzhiv_cart', JSON.stringify(cart));
             updateCartBadge();
@@ -1089,7 +1089,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
                 const rm = document.getElementById('modal-remove');
                 if (rm) {
                     rm.style.display = inCart ? 'inline-flex' : 'none';
-                    rm.onclick = () => removeFromCart(p.id);
+                    rm.onclick = () => dropFromCart(p.id);
                 }
             }
             
@@ -1122,7 +1122,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
                 buyBtn.className = 'buy-btn added';
                 goToCartBtn.style.display = 'block';
                 const rm = document.getElementById('modal-remove');
-                if (rm) { rm.style.display = 'inline-flex'; rm.onclick = () => removeFromCart(p.id); }
+                if (rm) { rm.style.display = 'inline-flex'; rm.onclick = () => dropFromCart(p.id); }
             }
         }
 
@@ -1131,7 +1131,7 @@ body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b
             let p = products.find(x => x.id === id);
             let inCart = cart.some(c => c.id === id);
             if (inCart) {
-                removeFromCart(id);
+                dropFromCart(id);
                 return;
             }
             if (p.sizes && p.sizes.length > 1) { openModal(p); return; }
