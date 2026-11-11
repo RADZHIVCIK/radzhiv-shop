@@ -302,7 +302,7 @@
                 <h2 style="margin-top:0; color:#fff;">Корзина</h2>
                 <div id="cart-items-wrap"></div>
                 <div class="cart-total" id="cart-total">Итого: 0 ₽</div>
-                <input type="text" id="promo-input" class="promo-input" placeholder="Промокод">
+                <input type="text" id="promo-input" class="promo-input" placeholder="Промокод" oninput="applyPromo()">
                 <button class="buy-btn" id="to-form-btn" onclick="openForm()" style="padding: 15px;">Перейти к оформлению</button>
             </div>
         </div>
@@ -424,7 +424,7 @@
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.4 · 11.11</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.5 · 11.11</p>
         </footer>
     </div>
 
@@ -495,8 +495,10 @@
         }
 
         const products = [{"id": 1, "article": "RAD-432525328", "name": "МУЖСКАЯ ЧЁРНАЯ ХУДИ", "price": "450", "old_price": "", "category": "Кофты", "condition": "Б/У", "status": "instock", "desc": "Товар Б/У\n⚠️ Нюанс: есть небольшой дефект на шве кармана -  разошлась строчка (на фото). В остальном вещь без других заметных дефектов, ткань не застиранная, катышков нет.", "color": "Чёрный", "sizes": ["S"], "imgs": ["img/1_img_0.jpg", "img/1_img_1.jpg", "img/1_img_2.jpg", "img/1_img_3.jpg"]}, {"id": 2, "article": "RAD-432525326", "name": "ПЛОТНАЯ МУСКАЯ ФУТБОЛКА", "price": "500", "old_price": "", "category": "Футболки", "condition": "Почти новое", "status": "instock", "desc": "Практически новая вещь, надевалась пару раз - горло оказалось узковато.", "color": "Чёрный", "sizes": [], "imgs": ["img/2_img_0.jpg", "img/2_img_1.jpg"]}, {"id": 3, "article": "RAD-0432525325", "name": "УДЛИНЕННАЯ ВЕТРОВКА O'STIN", "price": "700", "old_price": "", "category": "Куртки", "condition": "Б/У", "status": "instock", "desc": "Легкая куртка-бомбер прямого кроя.  Подкладка - дышащая сетка. Застегивается на молнию.\nТовар Б/У\nБренд: O'Stin\nСезон: Демисезон\nМатериал: Полиэстер\n⚠️ Нюанс: утерян шнурок внутренней кулиски на талии (металлические люверсы на месте, при желании можно вдеть новый). В остальном ткань, молния и манжеты полностью без дефектов.", "color": "Синий", "sizes": ["S"], "imgs": ["img/3_img_0.jpg", "img/3_img_1.jpg", "img/3_img_2.jpg"]}, {"id": 4, "article": "RAD-432525327", "name": "ЧЁРНЫЕ ПЛЯЖНЫЕ ШОРТЫ", "price": "700", "old_price": "", "category": "Шорты", "condition": "Почти новое", "status": "instock", "desc": "Новые, только примерялись. \n\n\nВнутри есть сетчатая подкладка\nНа поясе шнурок для регулировки", "color": "Чёрный", "sizes": ["S"], "imgs": ["img/4_img_0.jpg", "img/4_img_1.jpg", "img/4_img_2.jpg", "img/4_img_3.jpg", "img/4_img_4.jpg"]}];
+        const PROMOS = [];
         
         let currentProduct = null, currentCategory = 'Все', selectedSize = "", showFavoritesOnly = false;
+        let appliedPromo = null;
         let activeSizes = [], activeConditions = [];
         const allSizes = ['S', 'M', 'L', 'XL', 'XXL'];
         const allConditions = ['Новое', 'Почти новое', 'Б/У'];
@@ -792,6 +794,33 @@
             localStorage.setItem('radzhiv_cart', JSON.stringify(cart)); updateCartBadge(); updateCardButton(p.id, true);
         }
 
+        function cartBase() { return cart.reduce((s, i) => s + (parseInt(String(i.price).replace(/\D/g,'')) || 0), 0); }
+        function cartFinal() { const b = cartBase(); return appliedPromo ? Math.round(b * (100 - appliedPromo.discount) / 100) : b; }
+        function cartDiscount() { return cartBase() - cartFinal(); }
+
+        function updateCartTotal() {
+            const el = document.getElementById('cart-total');
+            if (!el) return;
+            const b = cartBase(), f = cartFinal();
+            el.innerHTML = appliedPromo
+                ? `Итого: ${f} ₽ <span style="font-size:12px;color:var(--muted);text-decoration:line-through;margin-left:6px;">${b} ₽</span>`
+                : `Итого: ${b} ₽`;
+        }
+
+        function applyPromo() {
+            const code = (document.getElementById('promo-input').value || '').trim().toUpperCase();
+            if (!code) { appliedPromo = null; updateCartTotal(); return; }
+            const found = (PROMOS || []).find(p => String(p.code || '').toUpperCase() === code);
+            if (found) {
+                const d = parseInt(found.discount) || 0;
+                appliedPromo = { code: found.code, discount: d };
+                showToast(`Промокод ${found.code}: −${d}%`);
+            } else {
+                appliedPromo = null;
+            }
+            updateCartTotal();
+        }
+
         function openCart() {
             const wrap = document.getElementById('cart-items-wrap'); wrap.innerHTML = ''; let total = 0;
             cart.forEach((item, idx) => {
@@ -801,7 +830,8 @@
                 wrap.appendChild(div);
             });
             if(cart.length === 0) wrap.innerHTML = '<p style="text-align:center;color:var(--muted); padding:20px;">Корзина пуста</p>';
-            document.getElementById('cart-total').innerText = `Итого: ${total} ₽`; 
+            document.getElementById('cart-total').innerHTML = `Итого: ${cartFinal()} ₽`; 
+            updateCartTotal();
             document.getElementById('to-form-btn').disabled = cart.length === 0;
             document.getElementById('cartModal').classList.add('show');
         }
@@ -895,7 +925,9 @@
                 div.innerHTML = `<img src="${item.img}"><div style="flex-grow:1;"><h4>${item.name}</h4><div style="font-size:11px;color:var(--muted);">Размер: ${item.size}</div><span style="color:var(--price);font-weight:bold; font-size: 14px;">${item.price}</span></div>`;
                 wrap.appendChild(div);
             });
-            document.getElementById('confirm-total').innerText = `Товары: ${total} ₽`;
+            document.getElementById('confirm-total').innerHTML = appliedPromo
+                ? `Товары: ${cartFinal()} ₽ <span style="font-size:12px;color:var(--muted);">(промокод −${appliedPromo.discount}%, было ${cartBase()} ₽)</span>`
+                : `Товары: ${cartBase()} ₽`;
             
             document.getElementById('formModal').classList.remove('show');
             document.getElementById('confirmModal').classList.add('show');
@@ -931,8 +963,8 @@
             if (btn.disabled) return;
             btn.disabled = true; btn.innerText = "Отправка...";
 
-            let promo = document.getElementById('promo-input').value;
-            let total = cart.reduce((sum, item) => sum + (parseInt(item.price.replace(/\D/g,'')) || 0), 0);
+            let promo = appliedPromo ? appliedPromo.code : document.getElementById('promo-input').value;
+            let total = cartFinal();
             
             orders.push({ date: new Date().toLocaleDateString(), items: [...cart], total: total, status: "Ожидает" });
             localStorage.setItem('radzhiv_orders', JSON.stringify(orders));
