@@ -445,6 +445,28 @@ body .buy-btn.added::after { content: " ✓"; }
     .logo { font-size: 18px; }
 }
 
+body.theme-light {
+    --bg: #fdf6ef; --bg2: #f7ece0; --surface: #fffaf4; --card: #ffffff; --card2: #fff3e6;
+    --text: #33210f; --muted: #8a6a54; --accent: #e2552b; --accent-hover: #ef6a41;
+    --price: #c2410c; --line: rgba(120,70,40,.16); --success: #2f9e6a;
+    background:
+        radial-gradient(900px 520px at 84% -8%, rgba(255,150,80,.18), transparent 62%),
+        radial-gradient(760px 520px at 6% 4%, rgba(255,190,120,.16), transparent 60%),
+        var(--bg);
+}
+body.theme-light .top-header { background: linear-gradient(180deg, rgba(255,250,244,.96), rgba(255,250,244,.78)); }
+body.theme-light .logo { background: linear-gradient(96deg, #2a180f, #b4441c 70%, #e2552b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.theme-light .page-title { background: linear-gradient(96deg, #2a180f, #b4441c 70%, #e2552b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.theme-light .card { background: #fff; box-shadow: 0 14px 34px rgba(80,45,20,.12); }
+body.theme-light .search-box { background: rgba(120,70,40,.06); }
+body.theme-light .icon-btn, body.theme-light .how-to-btn { background: rgba(120,70,40,.07); }
+body.theme-light .filter-cats button, body.theme-light .filter-group button,
+body.theme-light .filter-sizes button, body.theme-light .filter-conditions button { background: rgba(120,70,40,.07) !important; }
+body.theme-light .cart-content, body.theme-light .modal-content { background: linear-gradient(170deg, #fff, #fff7ee) !important; }
+body.theme-light .cart-modal { background: rgba(60,35,20,.42) !important; }
+body.theme-light #tg-blocker { background: radial-gradient(circle at 50% 0%, #fff2e4 0%, var(--bg) 78%) !important; }
+body.theme-light #tg-blocker h1 { background: linear-gradient(96deg, #2a180f, #b4441c 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
 </style>
 </head>
 <body>
@@ -681,7 +703,7 @@ body .buy-btn.added::after { content: " ✓"; }
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.2.70.8</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v2.0.1</p>
         </footer>
     </div>
 
@@ -693,15 +715,15 @@ body .buy-btn.added::after { content: " ✓"; }
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        const SITE_THEMES = ['night', 'coffee', 'ocean', 'forest'];
-        const SITE_THEME_ICONS = { night: '🌙', coffee: '☕', ocean: '🌊', forest: '🌿' };
+        const SITE_THEMES = ['night', 'light'];
+        const SITE_THEME_ICONS = { night: '🌙', light: '☀️' };
         function applySiteTheme(name) {
             if (SITE_THEMES.indexOf(name) < 0) name = 'night';
-            document.body.classList.remove('theme-coffee', 'theme-ocean', 'theme-forest');
-            if (name !== 'night') document.body.classList.add('theme-' + name);
+            document.body.classList.remove('theme-coffee', 'theme-ocean', 'theme-forest', 'theme-light');
+            if (name === 'light') document.body.classList.add('theme-light');
             try { localStorage.setItem('radzhiv_theme', name); } catch (e) {}
             const b = document.getElementById('theme-btn');
-            if (b) b.innerText = SITE_THEME_ICONS[name] || '🎨';
+            if (b) { b.innerText = SITE_THEME_ICONS[name] || '🌙'; b.title = name === 'light' ? 'Тёмная тема' : 'Светлая тема'; }
         }
         function cycleTheme() {
             const cur = localStorage.getItem('radzhiv_theme') || 'night';
