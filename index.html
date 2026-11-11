@@ -192,7 +192,233 @@
         /* кнопка «В корзине» всегда зелёная, независимо от темы */
         body .buy-btn.added { background: linear-gradient(145deg, #10b981, #059669) !important; border-color: #10b981 !important; box-shadow: 0 4px 15px rgba(16,185,129,0.35) !important; color: #fff !important; }
         body .buy-btn.added::after { content: " ✓"; }
-    </style>
+    /* ═══════════════════════════════════════════════════════════════
+   RADZHIV.SHOP · сочный слой
+   Вместо холодного «тёмно-синий неон» — тёплая слива, коралл и золото.
+   ═══════════════════════════════════════════════════════════════ */
+:root, body.theme-night {
+    --bg: #0b0710; --bg2: #120a17; --surface: #1a1020; --card: #22142a; --card2: #2c1a35;
+    --text: #fff4ea; --muted: #c6a7b4; --accent: #ff6a3d; --accent-hover: #ff855f;
+    --price: #ffcf5c; --success: #4ade80; --radius: 24px; --ring: rgba(255,106,61,.45);
+    --line: rgba(255,214,190,.11);
+}
+body.theme-coffee {
+    --bg: #150e0a; --bg2: #1d130d; --surface: #26190f; --card: #2f1f13; --card2: #3b2818;
+    --text: #fff3e4; --muted: #cfb094; --accent: #f0a14a; --accent-hover: #ffb463;
+    --price: #ffd98a; --ring: rgba(240,161,74,.45); --line: rgba(255,224,180,.13);
+}
+body.theme-ocean {
+    --bg: #04161a; --bg2: #062026; --surface: #0a2b31; --card: #0e343b; --card2: #124048;
+    --text: #eafcff; --muted: #96bcc4; --accent: #ffb347; --accent-hover: #ffc46b;
+    --price: #7ef0d0; --ring: rgba(255,179,71,.45); --line: rgba(180,240,255,.13);
+}
+body.theme-forest {
+    --bg: #0a1408; --bg2: #101d0d; --surface: #17260f; --card: #1e3014; --card2: #273d1a;
+    --text: #f3ffe8; --muted: #a8c195; --accent: #b6ff5c; --accent-hover: #c6ff7d;
+    --price: #ffe066; --ring: rgba(182,255,92,.4); --line: rgba(210,255,180,.13);
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+::selection { background: rgba(255,106,61,.35); color: #fff; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: "Inter", -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    background:
+        radial-gradient(900px 520px at 84% -8%, rgba(255,106,61,.16), transparent 62%),
+        radial-gradient(760px 520px at 6% 4%, rgba(214,72,152,.13), transparent 60%),
+        radial-gradient(900px 700px at 50% 108%, rgba(120,60,180,.16), transparent 65%),
+        var(--bg);
+    letter-spacing: -0.01em;
+}
+
+/* плавающие световые пятна */
+.bg-orb { filter: blur(90px); opacity: .5; mix-blend-mode: screen; }
+.orb-1 { background: radial-gradient(circle, #ff6a3d, transparent 68%) !important; animation: drift1 18s ease-in-out infinite; }
+.orb-2 { background: radial-gradient(circle, #7c3aed, transparent 68%) !important; animation: drift2 22s ease-in-out infinite; }
+@keyframes drift1 { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-40px,30px,0) scale(1.14); } }
+@keyframes drift2 { 0%,100% { transform: translate3d(0,0,0) scale(1.06); } 50% { transform: translate3d(36px,-26px,0) scale(.94); } }
+
+/* ── шапка ── */
+.top-header {
+    position: sticky; top: 0; z-index: 60;
+    background: linear-gradient(180deg, rgba(14,8,18,.94), rgba(14,8,18,.72));
+    backdrop-filter: blur(20px) saturate(170%);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 16px 40px rgba(0,0,0,.45);
+}
+.logo {
+    font-weight: 900; letter-spacing: .01em;
+    background: linear-gradient(96deg, #fff 8%, #ffd9c0 52%, #ff9a6a 92%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent; text-shadow: none; font-size: 21px;
+}
+.search-box {
+    border-radius: 14px; border: 1px solid var(--line);
+    background: rgba(255,255,255,.045); padding: 11px 16px;
+}
+.search-box:focus {
+    border-color: var(--accent); background: rgba(255,106,61,.08);
+    box-shadow: 0 0 0 4px rgba(255,106,61,.16);
+}
+.icon-btn {
+    border-radius: 14px; border: 1px solid var(--line);
+    background: rgba(255,255,255,.055); padding: 9px 13px; font-weight: 700;
+}
+.icon-btn:hover {
+    color: #fff; border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(255,106,61,.9), rgba(255,77,109,.9));
+    transform: translateY(-1px); box-shadow: 0 10px 22px rgba(255,77,109,.32);
+}
+.how-to-btn { border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); font-weight: 600; }
+.how-to-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(255,106,61,.1); }
+.cart-badge {
+    background: linear-gradient(135deg, #ff7a3d, #ff4d6d);
+    border-radius: 999px; padding: 2px 7px; font-weight: 900;
+    box-shadow: 0 4px 14px rgba(255,77,109,.6);
+}
+
+/* ── заголовки ── */
+.page-title {
+    font-size: clamp(26px, 6vw, 40px); font-weight: 900; letter-spacing: -0.03em;
+    background: linear-gradient(96deg, #fff, #ffcf5c 70%, #ff6a3d);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.page-title-wrap { padding: 22px 0 6px; }
+
+/* ── фильтры ── */
+.filter-cats button, .filter-group button, .filter-sizes button, .filter-conditions button,
+.delivery-grid button {
+    border-radius: 999px !important; padding: 9px 16px !important;
+    border: 1px solid var(--line) !important;
+    background: rgba(255,255,255,.05) !important;
+    color: var(--text) !important; font-weight: 600; transition: .22s;
+}
+.filter-cats button:hover, .filter-group button:hover,
+.filter-sizes button:hover, .filter-conditions button:hover {
+    border-color: var(--accent) !important; color: var(--accent) !important;
+    background: rgba(255,106,61,.1) !important; transform: translateY(-1px);
+}
+.filter-cats button.active, .filter-group button.active,
+.filter-sizes button.active, .filter-conditions button.active,
+.delivery-grid button.active {
+    background: linear-gradient(135deg, #ff7a3d, #ff4d6d) !important;
+    border-color: transparent !important; color: #fff !important;
+    box-shadow: 0 10px 24px rgba(255,77,109,.35) !important;
+}
+
+/* ── карточки товаров ── */
+.grid { gap: 16px; }
+.card {
+    border-radius: var(--radius);
+    background: linear-gradient(168deg, var(--card2) 0%, var(--card) 58%, #1a0f20 100%);
+    border: 1px solid var(--line);
+    box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    transition: transform .38s cubic-bezier(.16,1,.3,1), box-shadow .38s, border-color .38s;
+}
+.card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(255,106,61,.5);
+    box-shadow: 0 28px 60px rgba(255,106,61,.20), 0 22px 44px rgba(0,0,0,.62);
+}
+.card img { transition: transform .7s cubic-bezier(.16,1,.3,1); }
+.card:hover img { transform: scale(1.07); }
+.card::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.10) 46%, transparent 60%);
+    opacity: 0; transition: opacity .45s;
+}
+.card:hover::after { opacity: 1; }
+.badge {
+    background: linear-gradient(135deg, #ff8a3d, #ff4d6d);
+    border-radius: 9px; font-weight: 900; letter-spacing: .04em;
+    box-shadow: 0 6px 16px rgba(255,77,109,.45);
+}
+.title { font-weight: 700; }
+.price { color: var(--price); font-weight: 900; text-shadow: 0 0 26px rgba(255,207,92,.28); }
+.old-price { opacity: .65; }
+
+.buy-btn {
+    border-radius: 15px !important; font-weight: 800; letter-spacing: .01em;
+    background: linear-gradient(135deg, #ff7a3d, #ff4d6d 58%, #c9346b) !important;
+    box-shadow: 0 12px 26px rgba(255,77,109,.34) !important;
+    transition: transform .2s, filter .2s;
+}
+.buy-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.buy-btn:active { transform: scale(.985); }
+body .buy-btn.added { background: linear-gradient(135deg, #22c55e, #0f9d58) !important; box-shadow: 0 12px 26px rgba(34,197,94,.32) !important; }
+.reset-btn, .action-btns button {
+    border-radius: 14px !important; border: 1px solid var(--line) !important;
+    background: rgba(255,255,255,.06) !important; font-weight: 700;
+}
+.reset-btn:hover, .action-btns button:hover { border-color: var(--accent) !important; color: var(--accent) !important; }
+
+/* ── карточка товара внутри модалки ── */
+.modal-content, .cart-content {
+    border-radius: 28px !important;
+    background: linear-gradient(170deg, #241428 0%, #1a1020 60%, #150c1a 100%) !important;
+    border: 1px solid rgba(255,214,190,.14) !important;
+    box-shadow: 0 40px 90px rgba(0,0,0,.7) !important;
+}
+.cart-modal { backdrop-filter: blur(14px); background: rgba(8,4,10,.72) !important; }
+.modal-close { border-radius: 12px; border: 1px solid var(--line); background: rgba(0,0,0,.35); }
+.modal-close:hover { background: linear-gradient(135deg, #ff7a3d, #ff4d6d); border-color: transparent; }
+.slider { border-radius: 20px; overflow: hidden; }
+.slider-arrow { border-radius: 999px; background: rgba(12,6,16,.6); backdrop-filter: blur(8px); }
+.thumbnails-container .thumbnail { border-radius: 12px; border: 2px solid transparent; }
+.thumbnail.active { border-color: var(--accent); }
+.size-btn { border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+.size-btn.active { background: linear-gradient(135deg, #ff7a3d, #ff4d6d); border-color: transparent; color: #fff; box-shadow: 0 8px 20px rgba(255,77,109,.4); }
+.promo-input, .chk-input { border-radius: 13px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+.promo-input:focus, .chk-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,106,61,.14); }
+.confirm-label { color: var(--muted); }
+.confirm-val { font-weight: 700; }
+.cart-total { color: var(--price); font-weight: 900; }
+
+/* ── поддержка / футер ── */
+.support-fab {
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #ff7a3d, #ff4d6d) !important;
+    box-shadow: 0 16px 36px rgba(255,77,109,.42) !important;
+    border: none !important;
+}
+.support-fab:hover { filter: brightness(1.08); transform: translateY(-2px) scale(1.03); }
+.footer { border-top: 1px solid var(--line); padding-top: 18px; }
+.footer-links a {
+    border-radius: 999px; border: 1px solid var(--line);
+    background: rgba(255,255,255,.05); font-weight: 600;
+}
+.footer-links a:hover {
+    background: linear-gradient(135deg, rgba(255,122,61,.9), rgba(255,77,109,.9));
+    border-color: transparent; color: #fff; box-shadow: 0 10px 24px rgba(255,77,109,.3);
+}
+
+/* ── мелочи ── */
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,106,61,.32); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,106,61,.55); }
+#tg-blocker { background: radial-gradient(circle at 50% 0%, #241428 0%, var(--bg) 78%) !important; }
+#tg-blocker h1 {
+    font-size: 30px; font-weight: 900; letter-spacing: -.03em;
+    background: linear-gradient(96deg, #fff, #ffcf5c 70%, #ff6a3d);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+#tg-blocker a {
+    background: linear-gradient(135deg, #ff7a3d, #ff4d6d) !important;
+    box-shadow: 0 16px 34px rgba(255,77,109,.42) !important; border-radius: 16px !important;
+}
+#toast { border-radius: 16px !important; }
+
+@media (max-width: 640px) {
+    .page-title { font-size: 27px; }
+    .card { border-radius: 20px; }
+    .grid { gap: 12px; }
+    .logo { font-size: 18px; }
+}
+
+</style>
 </head>
 <body>
     <div id="toast">Текст уведомления</div>
@@ -424,7 +650,7 @@
                 <a href="https://t.me/radzhivcik">👤 Личный ТГ</a>
                 <a href="https://www.avito.ru/brands/dccca72fbbd04269296ab30af3d76df4">🟢 Авито</a>
             </div>
-            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v2.0 · 11.11</p>
+            <p style="color: var(--muted); font-size: 12px; margin:0;">© RADZHIV.SHOP · v1.2.70.1</p>
         </footer>
     </div>
 
@@ -455,16 +681,22 @@
 
         window.addEventListener('load', function() {
             let attempts = 0;
-            const maxAttempts = 20; 
+            const maxAttempts = 25;
             const tgCheck = setInterval(function() {
                 const tg = window.Telegram?.WebApp;
                 attempts++;
-                if (tg) { 
+                // внутри Telegram есть подписанные initData и user; в обычном
+                // браузере объект WebApp тоже существует, но пустой — по нему
+                // раньше и не срабатывала заглушка, а заказ молча терялся
+                const insideTg = !!(tg && tg.initDataUnsafe && tg.initDataUnsafe.user);
+                if (insideTg) {
                     clearInterval(tgCheck);
                     document.getElementById('tg-blocker').style.display = 'none';
                     document.getElementById('main-content').style.display = 'flex';
-                    if (tg.expand) tg.expand(); 
-                    if (tg.setHeaderColor) tg.setHeaderColor('#09090b');
+                    if (tg.expand) tg.expand();
+                    if (tg.setHeaderColor) tg.setHeaderColor('#120a16');
+                    if (tg.setBackgroundColor) tg.setBackgroundColor('#0e0710');
+                    if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
                     if (tg.ready) tg.ready();
                     applySiteTheme(localStorage.getItem('radzhiv_theme') || 'night');
                     resetView();
@@ -971,10 +1203,12 @@
             orders.push({ date: new Date().toLocaleDateString(), items: [...cart], total: total, status: "Ожидает" });
             localStorage.setItem('radzhiv_orders', JSON.stringify(orders));
 
-            let payload = { 
-                action: "checkout", 
-                items: cart, 
-                promo: promo, 
+            // Telegram ограничивает sendData 4096 байтами: шлём только то,
+            // что нужно боту, без ссылок на фото и лишних полей
+            let payload = {
+                action: "checkout",
+                items: cart.map(i => ({ name: i.name, article: i.article, size: i.size, price: i.price })),
+                promo: promo,
                 total: total,
                 customer: checkoutData
             };
